@@ -1,0 +1,51 @@
+import chalk from 'chalk';
+import yargs, { ArgumentsCamelCase, Argv } from 'yargs'
+import { hideBin } from 'yargs/helpers'
+import { version } from '../package.json'
+import { checkPackage } from './io/package';
+import { DeepOption, PackageOption } from './types';
+
+function deepOption(args: Argv<{}>): Argv<DeepOption> {
+  return args
+    // .option('deep', {
+    //   alias: 'd',
+    //   default: false,
+    //   type: 'boolean',
+    //   describe: 'Deep check the dependencies of packages'
+    // })
+}
+
+// eslint-disable-next-line no-unused-expressions
+yargs(hideBin(process.argv))
+  .scriptName('ndc')
+  .usage('$0 [args]')
+  .command(
+    "current",
+    "Check the packages of the current project",
+    (args) => deepOption(args).help()
+  )
+  .command(
+    "global",
+    "Check global packages",
+    (args) => deepOption(args).help()
+  )
+  .command(
+    "package <packageName>",
+    "Check for specified package",
+    (args) => 
+      deepOption(args)
+        .option('range', {
+          alias: 'r',
+          type: 'string',
+          describe: 'check the specify versions'
+        })
+        .help(),
+    args => checkPackage(args as ArgumentsCamelCase<PackageOption>)
+  )
+  .command("version", "show version", () => {
+    console.log(chalk.green(version))
+  })
+  .version(false)
+  .showHelpOnFail(false, 'Specify --help for available options')
+  .alias('h', 'help')
+  .help().argv;
