@@ -2,7 +2,9 @@ import chalk from 'chalk';
 import yargs, { ArgumentsCamelCase, Argv } from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { version } from '../package.json'
-import { checkPackage } from './io/package';
+import checkCurrent from './io/current';
+import checkGlobal from './io/global';
+import checkSpecified from './io/package';
 import { DeepOption, PackageOption } from './types';
 
 function deepOption(args: Argv<{}>): Argv<DeepOption> {
@@ -22,12 +24,14 @@ yargs(hideBin(process.argv))
   .command(
     "current",
     "Check the packages of the current project",
-    (args) => deepOption(args).help()
+    (args) => deepOption(args).help(),
+    (args) => checkCurrent(args as ArgumentsCamelCase<DeepOption>)
   )
   .command(
     "global",
     "Check global packages",
-    (args) => deepOption(args).help()
+    (args) => deepOption(args).help(),
+    (args) => checkGlobal(args as ArgumentsCamelCase<DeepOption>)
   )
   .command(
     "package <packageName>",
@@ -37,15 +41,28 @@ yargs(hideBin(process.argv))
         .option('range', {
           alias: 'r',
           type: 'string',
+          default: '',
           describe: 'check the specify versions'
         })
         .help(),
-    args => checkPackage(args as ArgumentsCamelCase<PackageOption>)
+    args => checkSpecified(args as ArgumentsCamelCase<PackageOption>)
   )
-  .command("version", "show version", () => {
-    console.log(chalk.green(version))
-  })
+  .command(
+    "version",
+    "Show version",
+    () => {
+      console.log(chalk.green(version))
+    }
+  )
+  .command(
+    "*",
+    "* Check the packages of the current project",
+    () => {},
+    (args) => checkCurrent(args as ArgumentsCamelCase<DeepOption>)
+  )
   .version(false)
   .showHelpOnFail(false, 'Specify --help for available options')
   .alias('h', 'help')
-  .help().argv;
+  .help()
+  .strict()
+  .argv;

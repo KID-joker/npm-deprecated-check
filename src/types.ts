@@ -6,7 +6,7 @@ export interface DeepOption {
 
 export interface PackageOption extends DeepOption {
   packageName: string,
-  range?: string
+  range: string
 }
 
 export interface PackageInfo {

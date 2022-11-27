@@ -1,11 +1,33 @@
 
+import chalk from 'chalk';
 import got from 'got';
 import semverMaxSatisfying from 'semver/ranges/max-satisfying';
 // import cache from './cache';
 import { PackageInfo, registryResult } from './types';
 import { execCommand } from './utils/exec';
+import { startSpinner, stopSpinner } from './utils/spinner';
 
-export async function getPackageInfo(packageName: string, range: string) {
+export async function checkPackage(packageName: string, range: string) {
+  startSpinner();
+  try {
+    const result = await getPackageInfo(packageName, range);
+
+    stopSpinner();
+    
+    if(result.deprecated) {
+      console.log(chalk.yellow(`${packageName}@${result.version}: `) + result.description);
+      console.log(chalk.red(`deprecated: ${result.deprecated}`))
+    } else {
+      console.log(chalk.green(`${packageName}@${result.version}: `) + result.description);
+    }
+  } catch(e: any) {
+    stopSpinner();
+
+    console.error(e.message);
+  }
+}
+
+async function getPackageInfo(packageName: string, range: string) {
   // const cachedPackageInfo = cache.getIfPresent(`${packageName}@${range}`) as PackageInfo;
   // if(cachedPackageInfo) {
   //   return cachedPackageInfo;
