@@ -1,5 +1,3 @@
-import { version } from "yargs"
-
 export interface DeepOption {
   deep?: boolean
 }
@@ -9,6 +7,10 @@ export interface PackageOption extends DeepOption {
   range: string
 }
 
+export interface GlobalOption extends DeepOption {
+  manager: string
+}
+
 export interface PackageInfo {
   version: string,
   description: string,
@@ -16,7 +18,7 @@ export interface PackageInfo {
   dependencies: object
 }
 
-export interface registryResult {
+export interface RegistryResult {
   name: string,
   description: string,
   versions: {
@@ -29,3 +31,15 @@ export interface registryResult {
     }
   }
 }
+
+interface VersionOption {
+  version: string,
+  range?: string
+}
+
+interface RangeOption {
+  version?: string,
+  range: string
+}
+
+export type VersionOrRange = VersionOption | RangeOption;

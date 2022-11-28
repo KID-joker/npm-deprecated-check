@@ -3,14 +3,14 @@ import chalk from 'chalk';
 import got from 'got';
 import semverMaxSatisfying from 'semver/ranges/max-satisfying';
 // import cache from './cache';
-import { PackageInfo, registryResult } from './types';
+import { PackageInfo, RegistryResult, VersionOrRange } from './types';
 import { execCommand } from './utils/exec';
 import { startSpinner, stopSpinner } from './utils/spinner';
 
-export async function checkPackage(packageName: string, range: string) {
+export async function checkPackage(packageName: string, options: VersionOrRange) {
   startSpinner();
   try {
-    const result = await getPackageInfo(packageName, range);
+    const result = await getPackageInfo(packageName, options);
 
     stopSpinner();
     
@@ -27,7 +27,7 @@ export async function checkPackage(packageName: string, range: string) {
   }
 }
 
-async function getPackageInfo(packageName: string, range: string) {
+async function getPackageInfo(packageName: string, options: VersionOrRange) {
   // const cachedPackageInfo = cache.getIfPresent(`${packageName}@${range}`) as PackageInfo;
   // if(cachedPackageInfo) {
   //   return cachedPackageInfo;
@@ -35,11 +35,15 @@ async function getPackageInfo(packageName: string, range: string) {
 
   const registry = execCommand('npm config get registry');
 
-  const packageInfo = await got.get(registry + packageName).json() as registryResult;
+  const packageInfo = await got.get(registry + packageName).json() as RegistryResult;
 
-  const versions = Object.keys(packageInfo.versions);
-  
-  const version = semverMaxSatisfying(versions, range);
+  let version: string | undefined | null = options.version;
+
+  if(!version) {
+    const versions = Object.keys(packageInfo.versions);
+    version = semverMaxSatisfying(versions, options.range as string);
+  }
+
   if(!version) {
     throw new Error('Please enter the correct range!');
   }

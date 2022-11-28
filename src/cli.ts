@@ -5,7 +5,7 @@ import { version } from '../package.json'
 import checkCurrent from './io/current';
 import checkGlobal from './io/global';
 import checkSpecified from './io/package';
-import { DeepOption, PackageOption } from './types';
+import { DeepOption, GlobalOption, PackageOption } from './types';
 
 function deepOption(args: Argv<{}>): Argv<DeepOption> {
   return args
@@ -30,8 +30,17 @@ yargs(hideBin(process.argv))
   .command(
     "global",
     "Check global packages",
-    (args) => deepOption(args).help(),
-    (args) => checkGlobal(args as ArgumentsCamelCase<DeepOption>)
+    (args) => 
+      deepOption(args)
+        .option('manager', {
+          alias: 'm',
+          type: 'string',
+          default: 'npm',
+          choices: ['npm', 'yarn', 'pnpm'],
+          describe: 'Check global packages of the package manager'
+        })
+        .help(),
+    (args) => checkGlobal(args as ArgumentsCamelCase<GlobalOption>)
   )
   .command(
     "package <packageName>",

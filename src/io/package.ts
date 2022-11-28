@@ -11,5 +11,5 @@ export default async function checkSpecified(options: ArgumentsCamelCase<Package
     return console.log(chalk.red('Please enter the correct packageName!'));
   }
 
-  checkPackage(packageName, range);
+  checkPackage(packageName, { range });
 }
