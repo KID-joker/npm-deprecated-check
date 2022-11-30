@@ -72,7 +72,7 @@ yargs(hideBin(process.argv))
   .command(
     "*",
     "* Check the packages of the current project",
-    () => {},
+    (args) => commonOption(args),
     (args) => checkCurrent(args as ArgumentsCamelCase<CommonOption>)
   )
   .version(false)
