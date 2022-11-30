@@ -1,13 +1,13 @@
 
 import chalk from 'chalk';
 import got from 'got';
-import semverMaxSatisfying from 'semver/ranges/max-satisfying';
+import semver from 'semver';
 // import cache from './cache';
 import { PackageInfo, RegistryResult, VersionOrRange } from './types';
 import { execCommand } from './utils/exec';
 import { startSpinner, stopSpinner } from './utils/spinner';
 
-export async function checkPackage(packageName: string, options: VersionOrRange) {
+export async function checkPackage(packageName: string, options: VersionOrRange, all: boolean) {
   startSpinner();
   try {
     const result = await getPackageInfo(packageName, options);
@@ -17,9 +17,11 @@ export async function checkPackage(packageName: string, options: VersionOrRange)
     if(result.deprecated) {
       console.log(chalk.yellow(`${packageName}@${result.version}: `) + result.description);
       console.log(chalk.red(`deprecated: ${result.deprecated}`))
-    } else {
+    } else if(all) {
       console.log(chalk.green(`${packageName}@${result.version}: `) + result.description);
     }
+
+    return result;
   } catch(e: any) {
     stopSpinner();
 
@@ -41,7 +43,7 @@ async function getPackageInfo(packageName: string, options: VersionOrRange) {
 
   if(!version) {
     const versions = Object.keys(packageInfo.versions);
-    version = semverMaxSatisfying(versions, options.range as string);
+    version = semver.maxSatisfying(versions, options.range as string);
   }
 
   if(!version) {

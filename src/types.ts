@@ -1,13 +1,14 @@
-export interface DeepOption {
-  deep?: boolean
+export interface CommonOption {
+  deep?: boolean,
+  all: boolean
 }
 
-export interface PackageOption extends DeepOption {
+export interface PackageOption extends CommonOption {
   packageName: string,
   range: string
 }
 
-export interface GlobalOption extends DeepOption {
+export interface GlobalOption extends CommonOption {
   manager: string
 }
 
@@ -32,14 +33,7 @@ export interface RegistryResult {
   }
 }
 
-interface VersionOption {
-  version: string,
+export interface VersionOrRange {
+  version?: string,
   range?: string
 }
-
-interface RangeOption {
-  version?: string,
-  range: string
-}
-
-export type VersionOrRange = VersionOption | RangeOption;

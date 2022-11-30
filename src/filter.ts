@@ -12,5 +12,5 @@ export function isURLPackage(versionRange: string) {
 }
 
 export function isGitPackage(versionRange: string) {
-  return /^git(\+(ssh|https?|file))?:\/\/.+/.test(versionRange)
+  return /.+\.git$/.test(versionRange)
 }

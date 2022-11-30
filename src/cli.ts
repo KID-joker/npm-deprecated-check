@@ -5,10 +5,16 @@ import { version } from '../package.json'
 import checkCurrent from './io/current';
 import checkGlobal from './io/global';
 import checkSpecified from './io/package';
-import { DeepOption, GlobalOption, PackageOption } from './types';
+import { CommonOption, GlobalOption, PackageOption } from './types';
 
-function deepOption(args: Argv<{}>): Argv<DeepOption> {
+function commonOption(args: Argv<{}>): Argv<CommonOption> {
   return args
+    .option('all', {
+      alias: 'a',
+      default: false,
+      type: 'boolean',
+      describe: 'show all packages info'
+    })
     // .option('deep', {
     //   alias: 'd',
     //   default: false,
@@ -24,14 +30,14 @@ yargs(hideBin(process.argv))
   .command(
     "current",
     "Check the packages of the current project",
-    (args) => deepOption(args).help(),
-    (args) => checkCurrent(args as ArgumentsCamelCase<DeepOption>)
+    (args) => commonOption(args).help(),
+    (args) => checkCurrent(args as ArgumentsCamelCase<CommonOption>)
   )
   .command(
     "global",
     "Check global packages",
     (args) => 
-      deepOption(args)
+      commonOption(args)
         .option('manager', {
           alias: 'm',
           type: 'string',
@@ -46,7 +52,7 @@ yargs(hideBin(process.argv))
     "package <packageName>",
     "Check for specified package",
     (args) => 
-      deepOption(args)
+      commonOption(args)
         .option('range', {
           alias: 'r',
           type: 'string',
@@ -67,7 +73,7 @@ yargs(hideBin(process.argv))
     "*",
     "* Check the packages of the current project",
     () => {},
-    (args) => checkCurrent(args as ArgumentsCamelCase<DeepOption>)
+    (args) => checkCurrent(args as ArgumentsCamelCase<CommonOption>)
   )
   .version(false)
   .showHelpOnFail(false, 'Specify --help for available options')
