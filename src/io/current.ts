@@ -18,7 +18,7 @@ export default async function checkCurrent(options: ArgumentsCamelCase<CommonOpt
 
     const dependenciesOfLockfile = await getDependenciesOfLockfile(npmDependencies);
 
-    const dependencies = Object.assign(dependenciesOfPackageJson, dependenciesOfLockfile);
+    const dependencies = Object.assign(npmDependencies, dependenciesOfLockfile);
 
     let healthy = true;
 

@@ -16,7 +16,7 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
       const { dependencies } = fs.readJsonSync(this.path);
       const result: Record<string, VersionOrRange> = {};
       for(const packageName in packages) {
-        result[packageName] = { version: dependencies[packageName].version };
+        dependencies[packageName] && (result[packageName] = { version: dependencies[packageName].version });
       }
       return result;
     }
@@ -27,7 +27,7 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
       const json = lockfile.parse(content);
       const result: Record<string, VersionOrRange> = {};
       for(const packageName in packages) {
-        result[packageName] = { version: json.object[`${packageName}@${packages[packageName].range}`].version }
+        json.object[`${packageName}@${packages[packageName].range}`] && (result[packageName] = { version: json.object[`${packageName}@${packages[packageName].range}`].version });
       }
       return result;
     }
@@ -38,11 +38,9 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
       if(content && content.packages) {
         const packageNames = Object.keys(packages);
         const result: Record<string, VersionOrRange> = {};
-        for(const depPath of Object.keys(content.packages)) {
+        for(const depPath in content.packages) {
           const info = dp.parse(depPath);
-          if(packageNames.includes(info.name as string)) {
-            result[info.name as string] = { version: info.version };
-          }
+          packageNames.includes(info.name as string) && (result[info.name as string] = { version: info.version });
         }
         return result;
       } else {
@@ -54,7 +52,7 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
   const result = [npmLock, yarnLock, pnpmLock]
     .filter(ele => fs.existsSync(ele.path))
     .sort((a, b) => fs.lstatSync(a.path).mtimeMs - fs.lstatSync(b.path).mtimeMs)
-    .reduce(async (total, current) => Object.assign(total, await current.read()), {});
+    .reduce(async (total, current) => Object.assign(await total, await current.read()), {});
 
   return Promise.resolve(result);
 }
