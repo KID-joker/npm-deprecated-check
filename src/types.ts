@@ -14,18 +14,17 @@ export interface GlobalOption extends CommonOption {
 
 export interface PackageInfo {
   version: string,
-  description: string,
+  time: string,
   deprecated?: string,
   dependencies: object
 }
 
 export interface RegistryResult {
   name: string,
-  description: string,
+  time: Record<string, string>,
   versions: {
     [version: string]: {
       name: string,
-      description: string,
       version: string,
       deprecated?: string,
       dependencies?: object

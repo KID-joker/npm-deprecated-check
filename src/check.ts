@@ -15,17 +15,17 @@ export async function checkPackage(packageName: string, options: VersionOrRange,
     stopSpinner();
     
     if(result.deprecated) {
-      console.log(chalk.yellow(`${packageName}@${result.version}: `) + result.description);
+      console.log(chalk.yellow(`${packageName}@${result.version}: `) + result.time);
       console.log(chalk.red(`deprecated: ${result.deprecated}`))
     } else if(all) {
-      console.log(chalk.green(`${packageName}@${result.version}: `) + result.description);
+      console.log(chalk.green(`${packageName}@${result.version}: `) + result.time);
     }
 
     return result;
-  } catch(e: any) {
+  } catch(e) {
     stopSpinner();
 
-    console.error(e.message);
+    throw e;
   }
 }
 
@@ -52,7 +52,7 @@ async function getPackageInfo(packageName: string, options: VersionOrRange) {
 
   const cacheInfo: PackageInfo = {
     version,
-    description: packageInfo.description,
+    time: packageInfo.time[version],
     deprecated: packageInfo.versions[version].deprecated,
     dependencies: packageInfo.versions[version].dependencies || {}
   }
