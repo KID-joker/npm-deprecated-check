@@ -13,6 +13,10 @@ export async function checkPackage(packageName: string, options: VersionOrRange,
     const result = await getPackageInfo(packageName, options);
 
     stopSpinner();
+
+    if(!result) {
+      return;
+    }
     
     if(result.deprecated) {
       console.log(chalk.yellow(`${packageName}@${result.version}: `) + result.time);
@@ -39,6 +43,10 @@ async function getPackageInfo(packageName: string, options: VersionOrRange) {
 
   const packageInfo = await got.get(registry + packageName).json() as RegistryResult;
 
+  if(!packageInfo) {
+    return console.error('Could not find the package!');
+  }
+
   let version: string | undefined | null = options.version;
 
   if(!version) {
@@ -47,7 +55,7 @@ async function getPackageInfo(packageName: string, options: VersionOrRange) {
   }
 
   if(!version) {
-    throw new Error('Please enter the correct range!');
+    return console.error('Please enter the correct range!');
   }
 
   const cacheInfo: PackageInfo = {

@@ -32,8 +32,12 @@ export default async function checkGlobal(options: ArgumentsCamelCase<GlobalOpti
   
     for(const packageName in dependencies) {
       const result = await checkPackage(packageName, { version: dependencies[packageName].version }, all);
+
+      if(!result) {
+        continue;
+      }
       
-      if(result?.deprecated) {
+      if(result.deprecated) {
         healthy = false;
       }
     }

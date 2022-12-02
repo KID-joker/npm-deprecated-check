@@ -6,7 +6,7 @@ const packageJsonPath = resolve('./package.json');
 
 export function getDependenciesOfPackageJson() {
   if(!fs.existsSync(packageJsonPath)) {
-    throw new Error('package.json does not exist in the current path, please execute it under the correct project path.');
+    return console.error('package.json does not exist in the current path, please execute it under the correct project path.');
   }
 
   const { dependencies, devDependencies } = fs.readJsonSync(packageJsonPath);

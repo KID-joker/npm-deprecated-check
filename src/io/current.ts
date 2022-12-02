@@ -11,6 +11,10 @@ export default async function checkCurrent(options: ArgumentsCamelCase<CommonOpt
   try {
     const dependenciesOfPackageJson = getDependenciesOfPackageJson();
 
+    if(!dependenciesOfPackageJson) {
+      return;
+    }
+
     const entries = Object.entries(dependenciesOfPackageJson)
                           .filter(ele => !isLocalPackage(ele[1].range as string) && !isURLPackage(ele[1].range as string) && !isGitPackage(ele[1].range as string));
 
@@ -25,7 +29,11 @@ export default async function checkCurrent(options: ArgumentsCamelCase<CommonOpt
     for(const packageName in dependencies) {
       const result = await checkPackage(packageName, dependencies[packageName], all);
 
-      if(result?.deprecated) {
+      if(!result) {
+        continue;
+      }
+
+      if(result.deprecated) {
         healthy = false;
       }
     }
