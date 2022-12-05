@@ -1,7 +1,7 @@
 {
   "name": "npm-deprecated-check",
   "type": "module",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Check for deprecated packages",
   "author": "KID-joker <kid_joker@126.com>",
   "license": "MIT",

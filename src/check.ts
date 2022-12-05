@@ -12,8 +12,6 @@ export async function checkPackage(packageName: string, options: VersionOrRange,
   try {
     const result = await getPackageInfo(packageName, options);
 
-    stopSpinner();
-
     if(!result) {
       return;
     }
@@ -41,10 +39,17 @@ async function getPackageInfo(packageName: string, options: VersionOrRange) {
 
   const registry = execCommand('npm config get registry');
 
-  const packageInfo = await got.get(registry + packageName).json() as RegistryResult;
+  let packageInfo;
+  try {
+    packageInfo = await got.get(registry + packageName).json() as RegistryResult;
+  } catch(e: any) {
+    stopSpinner();
+    return console.error(e.message);
+  }
 
   if(!packageInfo) {
-    return console.error('Could not find the package!');
+    stopSpinner();
+    return console.error(`${packageName}: Could not find the package!`);
   }
 
   let version: string | undefined | null = options.version;
@@ -54,8 +59,9 @@ async function getPackageInfo(packageName: string, options: VersionOrRange) {
     version = semver.maxSatisfying(versions, options.range as string);
   }
 
-  if(!version) {
-    return console.error('Please enter the correct range!');
+  if(!version || !packageInfo.versions[version]) {
+    stopSpinner();
+    return console.error(`${packageName}: Please enter the correct range!`);
   }
 
   const cacheInfo: PackageInfo = {
@@ -67,5 +73,6 @@ async function getPackageInfo(packageName: string, options: VersionOrRange) {
 
   // cache.set(`${packageName}@${range}`, cacheInfo);
 
+  stopSpinner();
   return cacheInfo
 }
