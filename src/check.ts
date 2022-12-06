@@ -44,7 +44,7 @@ async function getPackageInfo(packageName: string, options: VersionOrRange) {
     packageInfo = await got.get(registry + packageName).json() as RegistryResult;
   } catch(e: any) {
     stopSpinner();
-    return console.error(e.message);
+    return console.error(`${packageName}: ${e.message}`);
   }
 
   if(!packageInfo) {
