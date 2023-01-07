@@ -19,7 +19,7 @@ export interface PackageInfo {
   dependencies: object
 }
 
-export interface RegistryResult {
+export interface PackageVersions {
   name: string,
   time: Record<string, string>,
   versions: {

@@ -60,7 +60,6 @@
     "got": "^12.5.3",
     "ora": "^6.1.2",
     "semver": "^7.3.8",
-    "transitory": "^2.2.0",
     "validate-npm-package-name": "^5.0.0",
     "yargs": "^17.6.2"
   }

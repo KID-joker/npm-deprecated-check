@@ -2,8 +2,8 @@
 import chalk from 'chalk';
 import got from 'got';
 import semver from 'semver';
-// import cache from './cache';
-import { PackageInfo, RegistryResult, VersionOrRange } from './types';
+import { getCacheFromMap, setCacheToMap } from './cache';
+import { PackageInfo, PackageVersions, VersionOrRange } from './types';
 import { execCommand } from './utils/exec';
 import { startSpinner, stopSpinner } from './utils/spinner';
 
@@ -32,47 +32,47 @@ export async function checkPackage(packageName: string, options: VersionOrRange,
 }
 
 async function getPackageInfo(packageName: string, options: VersionOrRange) {
-  // const cachedPackageInfo = cache.getIfPresent(`${packageName}@${range}`) as PackageInfo;
-  // if(cachedPackageInfo) {
-  //   return cachedPackageInfo;
-  // }
+  let packageVersions = getCacheFromMap(packageName);
 
-  const registry = execCommand('npm config get registry');
+  if(!packageVersions) {
+    const registry = execCommand('npm config get registry');
+  
+    try {
+      const packageRes = await got.get(registry + packageName).json() as PackageVersions;
 
-  let packageInfo;
-  try {
-    packageInfo = await got.get(registry + packageName).json() as RegistryResult;
-  } catch(e: any) {
-    stopSpinner();
-    return console.error(`${packageName}: ${e.message}`);
-  }
+      if(packageRes) {
+        packageVersions = packageRes;
+        setCacheToMap(packageName, packageRes);
+      } else {
+        stopSpinner();
+        return console.error(`${packageName}: Could not find the package!`);
+      }
 
-  if(!packageInfo) {
-    stopSpinner();
-    return console.error(`${packageName}: Could not find the package!`);
+    } catch(e: any) {
+      stopSpinner();
+      return console.error(`${packageName}: ${e.message}`);
+    }
   }
 
   let version: string | undefined | null = options.version;
 
   if(!version) {
-    const versions = Object.keys(packageInfo.versions);
+    const versions = Object.keys(packageVersions.versions);
     version = semver.maxSatisfying(versions, options.range as string);
   }
 
-  if(!version || !packageInfo.versions[version]) {
+  if(!version || !packageVersions.versions[version]) {
     stopSpinner();
     return console.error(`${packageName}: Please enter the correct range!`);
   }
 
-  const cacheInfo: PackageInfo = {
+  const packageInfo: PackageInfo = {
     version,
-    time: packageInfo.time[version],
-    deprecated: packageInfo.versions[version].deprecated,
-    dependencies: packageInfo.versions[version].dependencies || {}
+    time: packageVersions.time[version],
+    deprecated: packageVersions.versions[version].deprecated,
+    dependencies: packageVersions.versions[version].dependencies || {}
   }
 
-  // cache.set(`${packageName}@${range}`, cacheInfo);
-
   stopSpinner();
-  return cacheInfo
+  return packageInfo;
 }

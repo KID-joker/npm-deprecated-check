@@ -23,7 +23,6 @@ specifiers:
   got: ^12.5.3
   ora: ^6.1.2
   semver: ^7.3.8
-  transitory: ^2.2.0
   typescript: ^4.8.3
   unbuild: ^0.8.11
   validate-npm-package-name: ^5.0.0
@@ -40,7 +39,6 @@ dependencies:
   got: registry.npmjs.org/got/12.5.3
   ora: registry.npmjs.org/ora/6.1.2
   semver: registry.npmjs.org/semver/7.3.8
-  transitory: registry.npmjs.org/transitory/2.2.0
   validate-npm-package-name: registry.npmjs.org/validate-npm-package-name/5.0.0
   yargs: registry.npmjs.org/yargs/17.6.2
 
@@ -4921,13 +4919,6 @@ packages:
     dependencies:
       is-number: registry.npmjs.org/is-number/7.0.0
     dev: true
-
-  registry.npmjs.org/transitory/2.2.0:
-    resolution: {integrity: sha512-w8zHCdsvUg3xdNOnW9nhV/pxC7frAq8782r6obt7FaKs4YmUbXXUI9ll2qaaygfum8k1pdyanaD+oROl/00bWg==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/transitory/-/transitory-2.2.0.tgz}
-    name: transitory
-    version: 2.2.0
-    engines: {node: '>=8.0.0'}
-    dev: false
 
   registry.npmjs.org/tsconfig-paths/3.14.1:
     resolution: {integrity: sha512-fxDhWnFSLt3VuTwtvJt5fpwxBHg5AdKWMsgcPOOIilyjymcYVZoCQF8fvFRezCNfblEXmi+PcM1eYHeOAgXCOQ==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/tsconfig-paths/-/tsconfig-paths-3.14.1.tgz}

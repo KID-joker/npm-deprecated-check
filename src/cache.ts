@@ -1,8 +1,11 @@
-import { newCache } from 'transitory';
+import { PackageVersions } from './types';
 
-const cache = newCache()
-  .maxSize(1000)
-  .expireAfterRead(600000)
-  .build();
+const cacheMap: Map<string, PackageVersions> = new Map();
 
-export default cache;
+export function getCacheFromMap(name: string) {
+  return cacheMap.get(name);
+}
+
+export function setCacheToMap(name: string, packageVersions: PackageVersions) {
+  cacheMap.set(name, packageVersions);
+}
