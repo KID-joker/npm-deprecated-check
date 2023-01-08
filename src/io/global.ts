@@ -1,13 +1,12 @@
-import chalk from "chalk";
 import { ArgumentsCamelCase } from "yargs";
-import { checkPackage } from "../check";
+import { checkDependencies } from "../check";
 import { GlobalOption } from "../types";
 import { execCommand } from "../utils/exec";
 
 const yarnRegexp = /info "(.+)" has binaries/g;
 
-export default async function checkGlobal(options: ArgumentsCamelCase<GlobalOption>) {
-  const { deep, manager, all } = options;
+export default function checkGlobal(options: ArgumentsCamelCase<GlobalOption>) {
+  const { manager } = options;
   try {
     let dependencies: Record<string, { version: string }> = {};
     if(manager == 'pnpm') {
@@ -28,23 +27,7 @@ export default async function checkGlobal(options: ArgumentsCamelCase<GlobalOpti
       dependencies = result.dependencies;
     }
   
-    let healthy = true;
-  
-    for(const packageName in dependencies) {
-      const result = await checkPackage(packageName, { version: dependencies[packageName].version }, all);
-
-      if(!result) {
-        continue;
-      }
-      
-      if(result.deprecated) {
-        healthy = false;
-      }
-    }
-  
-    if(healthy && !all) {
-      console.log(chalk.green('All packages are healthy.'));
-    }
+    checkDependencies(dependencies, options);
   } catch(e: any) {
     console.error(e.message);
   }

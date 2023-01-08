@@ -36,3 +36,7 @@ export interface VersionOrRange {
   version?: string,
   range?: string
 }
+
+export interface Dependencies {
+  [packageName: string]: VersionOrRange
+}

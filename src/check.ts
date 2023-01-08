@@ -3,35 +3,40 @@ import chalk from 'chalk';
 import got from 'got';
 import semver from 'semver';
 import { getCacheFromMap, setCacheToMap } from './cache';
-import { PackageInfo, PackageVersions, VersionOrRange } from './types';
+import { CommonOption, Dependencies, PackageInfo, PackageVersions, VersionOrRange } from './types';
 import { execCommand } from './utils/exec';
 import { startSpinner, stopSpinner } from './utils/spinner';
 
-export async function checkPackage(packageName: string, options: VersionOrRange, all: boolean) {
-  startSpinner();
-  try {
-    const result = await getPackageInfo(packageName, options);
+export async function checkDependencies(dependencies: Dependencies, options: CommonOption) {
+  let { deep, all } = options;
+
+  let healthy = true;
+
+  for(const packageName in dependencies) {
+    const result = await getPackageInfo(packageName, dependencies[packageName]);
 
     if(!result) {
-      return;
+      continue;
     }
-    
+
     if(result.deprecated) {
+      healthy = false;
+
       console.log(chalk.yellow(`${packageName}@${result.version}: `) + result.time);
       console.log(chalk.red(`deprecated: ${result.deprecated}`))
     } else if(all) {
       console.log(chalk.green(`${packageName}@${result.version}: `) + result.time);
     }
+  }
 
-    return result;
-  } catch(e) {
-    stopSpinner();
-
-    throw e;
+  if(healthy && !all) {
+    console.log(chalk.green('All packages are healthy.'));
   }
 }
 
-async function getPackageInfo(packageName: string, options: VersionOrRange) {
+async function getPackageInfo(packageName: string, versionOrRange: VersionOrRange) {
+  startSpinner();
+
   let packageVersions = getCacheFromMap(packageName);
 
   if(!packageVersions) {
@@ -54,11 +59,11 @@ async function getPackageInfo(packageName: string, options: VersionOrRange) {
     }
   }
 
-  let version: string | undefined | null = options.version;
+  let version: string | undefined | null = versionOrRange.version;
 
   if(!version) {
     const versions = Object.keys(packageVersions.versions);
-    version = semver.maxSatisfying(versions, options.range as string);
+    version = semver.maxSatisfying(versions, versionOrRange.range as string);
   }
 
   if(!version || !packageVersions.versions[version]) {
