@@ -1,6 +1,6 @@
 import fs from "fs-extra";
 import { resolve } from 'path'
-import { VersionOrRange } from "../types";
+import { formatDependencies } from "../utils/format";
 
 const packageJsonPath = resolve('./package.json');
 
@@ -15,14 +15,4 @@ export function getDependenciesOfPackageJson() {
     ...formatDependencies(dependencies),
     ...formatDependencies(devDependencies)
   }
-}
-
-function formatDependencies(dependencies: Record<string, string>) {
-  const newDependencies: Record<string, VersionOrRange> = {}
-  for(const packageName in dependencies) {
-    newDependencies[packageName] = {
-      range: dependencies[packageName]
-    }
-  }
-  return newDependencies;
 }

@@ -17,4 +17,5 @@ export function startSpinner() {
 export function stopSpinner() {
   clearTimeout(timer);
   spinner.stop();
+  spinner.color = 'green';
 }

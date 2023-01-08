@@ -11,9 +11,6 @@ $ npm install -g npm-deprecated-check
 
 - Check the packages of current project, global or specified is deprecated.
 - According to the version range of lockfile and package.json.
-
-## Todo
-
 - Do a deep inspection of the dependency tree.
 
 ## Usage
@@ -29,14 +26,17 @@ command：
   ndc                        * Check the packages of the current project
 
 option：
+  -a, --all
+  -d, --deep
   -h, --help
 ```
 
-For `current` and `global`, you can view all dependency checks.
+For `current`, `global` and `package`, you can view all dependency checks deeply.
 
 ```bash
 option:
   -a, --all   show all packages info
+  -d, --deep  Deep check the dependencies of packages
 ```
 
 And `package`, a version range can be specified.

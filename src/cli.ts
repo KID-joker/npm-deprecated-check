@@ -15,12 +15,12 @@ function commonOption(args: Argv<{}>): Argv<CommonOption> {
       type: 'boolean',
       describe: 'show all packages info'
     })
-    // .option('deep', {
-    //   alias: 'd',
-    //   default: false,
-    //   type: 'boolean',
-    //   describe: 'Deep check the dependencies of packages'
-    // })
+    .option('deep', {
+      alias: 'd',
+      default: false,
+      type: 'boolean',
+      describe: 'Deep check the dependencies of packages'
+    })
 }
 
 // eslint-disable-next-line no-unused-expressions

@@ -16,7 +16,7 @@ export interface PackageInfo {
   version: string,
   time: string,
   deprecated?: string,
-  dependencies: object
+  dependencies: Record<string, VersionOrRange> | undefined
 }
 
 export interface PackageVersions {
@@ -35,8 +35,4 @@ export interface PackageVersions {
 export interface VersionOrRange {
   version?: string,
   range?: string
-}
-
-export interface Dependencies {
-  [packageName: string]: VersionOrRange
 }
