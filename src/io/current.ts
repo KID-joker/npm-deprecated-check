@@ -1,11 +1,9 @@
-import { ArgumentsCamelCase } from "yargs";
 import { checkDependencies } from "../check";
 import { isGitPackage, isLocalPackage, isURLPackage } from "../filter";
 import { getDependenciesOfLockfile } from "../packages/lockfiles";
 import { getDependenciesOfPackageJson } from "../packages/package_json";
-import { CommonOption } from "../types";
 
-export default async function checkCurrent(options: ArgumentsCamelCase<CommonOption>) {
+export default async function checkCurrent() {
   try {
     const dependenciesOfPackageJson = getDependenciesOfPackageJson();
 
@@ -22,7 +20,7 @@ export default async function checkCurrent(options: ArgumentsCamelCase<CommonOpt
 
     const dependencies = Object.assign(npmDependencies, dependenciesOfLockfile);
 
-    checkDependencies(dependencies, options);
+    checkDependencies(dependencies);
   } catch(e: any) {
     console.error(e.message);
   }

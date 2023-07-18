@@ -1,22 +1,17 @@
-export interface CommonOption {
-  deep?: boolean,
-  all: boolean
-}
-
-export interface PackageOption extends CommonOption {
+export interface PackageOption {
   packageName: string,
-  range: string
+  range?: string
 }
 
-export interface GlobalOption extends CommonOption {
-  manager: string
+export interface GlobalOption {
+  manager?: string
 }
 
 export interface PackageInfo {
+  name: string,
   version: string,
   time: string,
-  deprecated?: string,
-  dependencies: Record<string, VersionOrRange> | undefined
+  deprecated?: string
 }
 
 export interface PackageVersions {
@@ -26,8 +21,7 @@ export interface PackageVersions {
     [version: string]: {
       name: string,
       version: string,
-      deprecated?: string,
-      dependencies?: object
+      deprecated?: string
     }
   }
 }

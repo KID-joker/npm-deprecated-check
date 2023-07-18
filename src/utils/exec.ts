@@ -1,12 +1,7 @@
-import { execaCommandSync } from 'execa';
+import { execSync } from 'child_process';
 
 export function execCommand(command: string) {
-  try {
-    const { stdout } = execaCommandSync(command);
-    return stdout;
-  } catch(error: any) {
-    console.error(error?.shortMessage);
-    console.log(error?.stdout);
-    return error;
-  }
+  return execSync(command).toString();
 }
+
+export const registry = 'https://registry.npmjs.org/';

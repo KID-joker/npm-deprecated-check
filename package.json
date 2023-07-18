@@ -1,7 +1,7 @@
 {
   "name": "npm-deprecated-check",
   "type": "module",
-  "version": "0.1.7",
+  "version": "1.0.0",
   "description": "Check for deprecated packages",
   "author": "KID-joker <kid_joker@126.com>",
   "license": "MIT",
@@ -25,23 +25,21 @@
   "files": [
     "dist"
   ],
+  "preferGlobal": true,
   "scripts": {
-    "lint": "eslint .",
-    "dev": "esno ./src/cli.ts",
     "build": "unbuild",
-    "typecheck": "tsc --noEmit",
-    "prepublishOnly": "nr build",
-    "release": "bumpp && pnpm publish --no-git-checks"
+    "dev": "esno ./src/cli.ts",
+    "lint": "eslint . --fix",
+    "release": "bumpp && pnpm publish --no-git-checks",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.27.0",
-    "@antfu/ni": "^0.18.0",
     "@antfu/utils": "^0.5.2",
     "@types/fs-extra": "^9.0.13",
     "@types/node": "^18.7.18",
     "@types/semver": "^7.3.13",
     "@types/validate-npm-package-name": "^4.0.0",
-    "@types/yargs": "^17.0.13",
     "@types/yarnpkg__lockfile": "^1.1.5",
     "bumpp": "^8.2.1",
     "eslint": "^8.23.1",
@@ -55,12 +53,9 @@
     "@yarnpkg/lockfile": "^1.1.0",
     "chalk": "^5.1.2",
     "dependency-path": "^9.2.8",
-    "execa": "^6.1.0",
     "fs-extra": "^10.1.0",
-    "got": "^12.5.3",
+    "node-fetch": "^3.3.1",
     "ora": "^6.1.2",
-    "semver": "^7.3.8",
-    "validate-npm-package-name": "^5.0.0",
-    "yargs": "^17.6.2"
+    "semver": "^7.3.8"
   }
 }

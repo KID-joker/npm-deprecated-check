@@ -1,11 +1,10 @@
-import { ArgumentsCamelCase } from "yargs";
 import { checkDependencies } from "../check";
 import { GlobalOption } from "../types";
 import { execCommand } from "../utils/exec";
 
 const yarnRegexp = /info "(.+)" has binaries/g;
 
-export default function checkGlobal(options: ArgumentsCamelCase<GlobalOption>) {
+export default function checkGlobal(options: GlobalOption) {
   const { manager } = options;
   try {
     let dependencies: Record<string, { version: string }> = {};
@@ -27,7 +26,7 @@ export default function checkGlobal(options: ArgumentsCamelCase<GlobalOption>) {
       dependencies = result.dependencies;
     }
   
-    checkDependencies(dependencies, options);
+    checkDependencies(dependencies);
   } catch(e: any) {
     console.error(e.message);
   }
