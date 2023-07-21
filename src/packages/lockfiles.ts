@@ -1,6 +1,5 @@
 import { readWantedLockfile } from "@pnpm/lockfile-file";
 import lockfile from '@yarnpkg/lockfile';
-import dp from 'dependency-path';
 import fs from "fs-extra";
 import { resolve } from 'path';
 import { VersionOrRange } from "../types";
@@ -39,7 +38,7 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
         const packageNames = Object.keys(packages);
         const result: Record<string, VersionOrRange> = {};
         for(const depPath in content.packages) {
-          const info = dp.parse(depPath);
+          const info = content.packages[depPath];
           packageNames.includes(info.name as string) && (result[info.name as string] = { version: info.version });
         }
         return result;
@@ -49,10 +48,13 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
     }
   }
 
-  const result = [npmLock, yarnLock, pnpmLock]
+  const existsLock = [npmLock, yarnLock, pnpmLock]
     .filter(ele => fs.existsSync(ele.path))
-    .sort((a, b) => fs.lstatSync(a.path).mtimeMs - fs.lstatSync(b.path).mtimeMs)
-    .reduce(async (total, current) => Object.assign(await total, await current.read()), {});
+    .sort((a, b) => fs.lstatSync(b.path).mtimeMs - fs.lstatSync(a.path).mtimeMs);
 
-  return Promise.resolve(result);
+  if(existsLock.length > 0) {
+    return existsLock[0].read();
+  }
+
+  return {}
 }
