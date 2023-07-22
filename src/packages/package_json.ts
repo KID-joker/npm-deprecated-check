@@ -1,18 +1,17 @@
-import fs from "fs-extra";
 import { resolve } from 'path'
-import { formatDependencies } from "../utils/format";
+import fs from 'fs-extra'
+import { formatDependencies } from '../utils/format'
 
-const packageJsonPath = resolve('./package.json');
+const packageJsonPath = resolve('./package.json')
 
 export function getDependenciesOfPackageJson() {
-  if(!fs.existsSync(packageJsonPath)) {
-    return console.error('package.json does not exist in the current path, please execute it under the correct project path.');
-  }
+  if (!fs.existsSync(packageJsonPath))
+    return console.error('package.json does not exist in the current path, please execute it under the correct project path.')
 
-  const { dependencies, devDependencies } = fs.readJsonSync(packageJsonPath);
+  const { dependencies, devDependencies } = fs.readJsonSync(packageJsonPath)
 
   return {
     ...formatDependencies(dependencies),
-    ...formatDependencies(devDependencies)
+    ...formatDependencies(devDependencies),
   }
 }

@@ -1,5 +1,5 @@
 export interface PackageOption {
-  packageName: string,
+  packageName: string
   range?: string
 }
 
@@ -8,25 +8,25 @@ export interface GlobalOption {
 }
 
 export interface PackageInfo {
-  name: string,
-  version: string,
-  time: string,
+  name: string
+  version: string
+  time: string
   deprecated?: string
 }
 
 export interface PackageVersions {
-  name: string,
-  time: Record<string, string>,
+  name: string
+  time: Record<string, string>
   versions: {
     [version: string]: {
-      name: string,
-      version: string,
+      name: string
+      version: string
       deprecated?: string
     }
   }
 }
 
 export interface VersionOrRange {
-  version?: string,
+  version?: string
   range?: string
 }

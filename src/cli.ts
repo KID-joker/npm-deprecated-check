@@ -1,8 +1,8 @@
 import { version } from '../package.json'
-import checkCurrent from './io/current';
-import checkGlobal from './io/global';
-import checkSpecified from './io/package';
-import { GlobalOption, PackageOption } from './types';
+import checkCurrent from './io/current'
+import checkGlobal from './io/global'
+import checkSpecified from './io/package'
+import type { GlobalOption, PackageOption } from './types'
 
 type Command = 'current' | 'global' | 'package' | 'version' | 'help'
 interface CliArgs {
@@ -32,66 +32,70 @@ const commandFuncs: Record<Command, Function> = {
   global: (args: GlobalOption) => checkGlobal(args),
   package: (args: PackageOption) => checkSpecified(args),
   version: () => console.log(version),
-  help: () => console.log(help)
+  help: () => console.log(help),
 }
 
 function runCli(args: CliArgs) {
-  const { command, options } = args;
+  const { command, options } = args
 
-  commandFuncs[command](options);
+  commandFuncs[command](options)
 }
 
 function parseArgs() {
-  const args = process.argv.slice(2);
+  const args = process.argv.slice(2)
 
-  let command: string = args[0] || 'current';
-  let realCommand: Command;
+  const command: string = args[0] || 'current'
+  let realCommand: Command
 
-  let options: undefined | PackageOption | GlobalOption = undefined;
+  let options: undefined | PackageOption | GlobalOption
 
-  switch(command) {
+  switch (command) {
     case 'current':
     case 'version':
-    case 'help':
-      realCommand = command;
-      break;
-    case 'global':
-      realCommand = command;
-      const managerOption = args.slice(1).find(ele => ele.startsWith('-m') || ele.startsWith('--manger'));
-      if(managerOption) {
+    case 'help': {
+      realCommand = command
+      break
+    }
+    case 'global': {
+      realCommand = command
+      const managerOption = args.slice(1).find(ele => ele.startsWith('-m') || ele.startsWith('--manger'))
+      if (managerOption) {
         options = {
-          manager: managerOption.match(/^(-m|--manger)=(.+)$/)![2]
+          manager: managerOption.match(/^(-m|--manger)=(.+)$/)![2],
         }
       }
-      break;
-    case 'package':
-      realCommand = command;
-      if(!args[1]) {
-        console.error('Please enter the package name!');
-        process.exit(0);
+      break
+    }
+    case 'package': {
+      realCommand = command
+      if (!args[1]) {
+        console.error('Please enter the package name!')
+        process.exit(0)
       }
 
-      const packageOption = args.slice(1).find(ele => ele.startsWith('-r') || ele.startsWith('--range'));
-      let range = '';
-      if(packageOption) {
-        range = packageOption.match(/^(-r|--range)=(.+)$/)![2];
-      }
+      const packageOption = args.slice(1).find(ele => ele.startsWith('-r') || ele.startsWith('--range'))
+      let range = ''
+      if (packageOption)
+        range = packageOption.match(/^(-r|--range)=(.+)$/)![2]
+
       options = {
         packageName: args[1],
-        range
-      };
-      break;
-    default:
-      realCommand = 'help';
-      console.error('Run `ndc help` for usage information');
+        range,
+      }
+      break
+    }
+    default: {
+      realCommand = 'help'
+      console.error('Run `ndc help` for usage information')
+    }
   }
 
   return Promise.resolve({
     command: realCommand,
-    options
+    options,
   })
 }
 
-parseArgs().then(res => {
-  runCli(res);
+parseArgs().then((res) => {
+  runCli(res)
 })

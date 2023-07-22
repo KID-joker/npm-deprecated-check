@@ -1,7 +1,7 @@
-import { execSync } from 'child_process';
+import { execSync } from 'child_process'
 
 export function execCommand(command: string) {
-  return execSync(command).toString();
+  return execSync(command).toString()
 }
 
-export const registry = 'https://registry.npmjs.org/';
+export const registry = 'https://registry.npmjs.org/'

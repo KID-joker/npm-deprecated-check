@@ -1,8 +1,8 @@
-import { checkDependencies } from "../check";
-import { PackageOption } from "../types";
+import { checkDependencies } from '../check'
+import type { PackageOption } from '../types'
 
 export default function checkSpecified(options: PackageOption) {
-  const { packageName, range } = options;
+  const { packageName, range } = options
 
-  checkDependencies({ [packageName]: { range } });
+  checkDependencies({ [packageName]: { range } })
 }

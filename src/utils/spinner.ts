@@ -1,21 +1,21 @@
-import ora from 'ora';
+import ora from 'ora'
 
-const spinner = ora('Checking');
-let timer: NodeJS.Timeout;
+const spinner = ora('Checking')
+let timer: NodeJS.Timeout
 
 export function startSpinner() {
-  spinner.start();
+  spinner.start()
   timer = setTimeout(() => {
-    spinner.color = 'yellow';
+    spinner.color = 'yellow'
 
     timer = setTimeout(() => {
-      spinner.color = 'red';
-    }, 30000);
-  }, 30000);
+      spinner.color = 'red'
+    }, 30000)
+  }, 30000)
 }
 
 export function stopSpinner() {
-  clearTimeout(timer);
-  spinner.stop();
-  spinner.color = 'green';
+  clearTimeout(timer)
+  spinner.stop()
+  spinner.color = 'green'
 }

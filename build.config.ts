@@ -5,5 +5,5 @@ export default defineBuildConfig({
   rollup: {
     inlineDependencies: true,
   },
-  clean: true
+  clean: true,
 })
