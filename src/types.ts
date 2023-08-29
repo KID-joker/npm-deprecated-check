@@ -7,6 +7,13 @@ export interface GlobalOption {
   manager?: string
 }
 
+export interface ConfigOption {
+  get?: string
+  set?: Array<string>
+  delete?: string
+  list?: boolean
+}
+
 export interface PackageInfo {
   name: string
   version: string
