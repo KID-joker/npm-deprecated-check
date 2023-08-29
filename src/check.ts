@@ -12,7 +12,7 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
   stopSpinner()
   for (const result of resultList) {
     if (result && result.deprecated) {
-      console.log(chalk.yellow(`${result.name}@${result.version}: `) + result.time)
+      console.log(chalk.bgYellow(' WARN ') + " " + chalk.yellow(`${result.name}@${result.version}: `) + result.time)
       console.log(chalk.red(`deprecated: ${result.deprecated}`))
     }
   }

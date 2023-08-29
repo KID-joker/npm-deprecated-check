@@ -4,6 +4,7 @@ const spinner = ora('Checking')
 let timer: NodeJS.Timeout
 
 export function startSpinner() {
+  spinner.color = 'green'
   spinner.start()
   timer = setTimeout(() => {
     spinner.color = 'yellow'
@@ -17,5 +18,4 @@ export function startSpinner() {
 export function stopSpinner() {
   clearTimeout(timer)
   spinner.stop()
-  spinner.color = 'green'
 }
