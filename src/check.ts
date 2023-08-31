@@ -5,10 +5,11 @@ import semver from 'semver'
 import type { PackageInfo, PackageVersions, VersionOrRange } from './types'
 import { registry } from './utils/exec'
 import { startSpinner, stopSpinner } from './utils/spinner'
+import { recommendDependencies } from './chatgpt'
 
-export async function checkDependencies(dependencies: Record<string, VersionOrRange>) {
+export async function checkDependencies(dependencies: Record<string, VersionOrRange>, config: Record<string, any>) {
   startSpinner()
-  const resultList = await Promise.all(Object.keys(dependencies).map(packageName => getPackageInfo(packageName, dependencies[packageName])))
+  const resultList = await Promise.all(Object.keys(dependencies).map(packageName => getPackageInfo(packageName, dependencies[packageName], config)))
   stopSpinner()
   for (const result of resultList) {
     if (result && result.deprecated) {
@@ -18,7 +19,7 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
   }
 }
 
-async function getPackageInfo(packageName: string, versionOrRange: VersionOrRange) {
+async function getPackageInfo(packageName: string, versionOrRange: VersionOrRange, config: Record<string, any>) {
   let packageRes
 
   try {
@@ -44,11 +45,15 @@ async function getPackageInfo(packageName: string, versionOrRange: VersionOrRang
     return console.error(`${packageName}: Please enter the correct range!`)
   }
 
+  const deprecated = packageRes.versions[version].deprecated
+  const recommend = deprecated ? await recommendDependencies(packageRes.name, config.openaiKey) : null
+
   const packageInfo: PackageInfo = {
     name: packageRes.name,
     version,
     time: packageRes.time[version],
-    deprecated: packageRes.versions[version].deprecated,
+    deprecated,
+    recommend,
   }
 
   return packageInfo

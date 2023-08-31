@@ -5,7 +5,7 @@ import { execCommand } from '../utils/exec'
 const yarnRegexp = /info "(.+)" has binaries/g
 
 export default function checkGlobal(options: GlobalOption) {
-  const { manager } = options
+  const { manager, ...openaiOptions } = options
   try {
     let dependencies: Record<string, { version: string }> = {}
     if (manager === 'pnpm') {
@@ -28,7 +28,7 @@ export default function checkGlobal(options: GlobalOption) {
       dependencies = result.dependencies
     }
 
-    checkDependencies(dependencies)
+    checkDependencies(dependencies, openaiOptions)
   }
   catch (e: any) {
     console.error(e.message)

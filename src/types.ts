@@ -1,10 +1,15 @@
-export interface PackageOption {
-  packageName: string
-  range?: string
+export interface OpenaiOption {
+  openaiKey?: string
+  openaiModel?: string
 }
 
-export interface GlobalOption {
+export interface GlobalOption extends OpenaiOption {
   manager?: string
+}
+
+export interface PackageOption extends OpenaiOption {
+  packageName: string
+  range?: string
 }
 
 export interface ConfigOption {
@@ -18,7 +23,8 @@ export interface PackageInfo {
   name: string
   version: string
   time: string
-  deprecated?: string
+  deprecated: string | undefined
+  recommend: Array<string> | null
 }
 
 export interface PackageVersions {

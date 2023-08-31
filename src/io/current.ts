@@ -2,8 +2,9 @@ import { checkDependencies } from '../check'
 import { isGitPackage, isLocalPackage, isURLPackage } from '../filter'
 import { getDependenciesOfLockfile } from '../packages/lockfiles'
 import { getDependenciesOfPackageJson } from '../packages/package_json'
+import type { OpenaiOption } from '../types'
 
-export default async function checkCurrent() {
+export default async function checkCurrent(options: OpenaiOption) {
   try {
     const dependenciesOfPackageJson = getDependenciesOfPackageJson()
 
@@ -19,7 +20,7 @@ export default async function checkCurrent() {
 
     const dependencies = Object.assign(npmDependencies, dependenciesOfLockfile)
 
-    checkDependencies(dependencies)
+    checkDependencies(dependencies, options)
   }
   catch (e: any) {
     console.error(e.message)

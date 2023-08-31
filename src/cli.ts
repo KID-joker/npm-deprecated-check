@@ -5,7 +5,10 @@ import checkCurrent from './io/current'
 import checkGlobal from './io/global'
 import checkPackage from './io/package'
 import checkConfig from './io/config'
-import type { ConfigOption, GlobalOption, PackageOption } from './types'
+import type { ConfigOption, GlobalOption, OpenaiOption, PackageOption } from './types'
+
+const gptOption = new Option('--openaiKey <value>', 'recommend alternative packages via ChatGPT')
+const gptModelOption = new Option('--openaiModel <value>', 'ChatGPT model, choices: [gpt-3.5, gpt-4]').choices(['gpt-3.5', 'gpt-4']).default('gpt-3.5')
 
 program
   .version(`npm-deprecated-check ${version}`)
@@ -14,14 +17,18 @@ program
 program
   .command('current')
   .description('check the packages of the current project')
-  .action(() => {
-    checkCurrent()
+  .addOption(gptOption)
+  .addOption(gptModelOption)
+  .action((option: OpenaiOption) => {
+    checkCurrent(option)
   })
 
 program
   .command('global')
   .description('check global packages, default: npm')
   .addOption(new Option('-m, --manger <value>', 'check specified package manger, choices: [npm, yarn, pnpm]').choices(['npm', 'yarn', 'pnpm']).default('npm'))
+  .addOption(gptOption)
+  .addOption(gptModelOption)
   .action((globalOption: GlobalOption) => {
     checkGlobal(globalOption)
   })
@@ -30,6 +37,8 @@ program
   .command('package <packageName>')
   .description('check for specified package')
   .option('-r, --range <value>', 'check specified versions')
+  .addOption(gptOption)
+  .addOption(gptModelOption)
   .action((packageName: string, option: { range?: string }) => {
     const packageOption: PackageOption = {
       packageName,

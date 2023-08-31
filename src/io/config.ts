@@ -5,11 +5,15 @@ import { get, set, unset } from '../utils/object'
 import { rcPath } from '../shared'
 import { version } from '../../package.json'
 
-export default async function configure(options: ConfigOption) {
+export default function configure(options: ConfigOption) {
   if (!fs.existsSync(rcPath))
-    fs.writeFile(rcPath, JSON.stringify({ latestVersion: version, lastChecked: Date.now() }, null, 2), 'utf-8')
+    fs.writeFileSync(rcPath, JSON.stringify({ latestVersion: version, lastChecked: Date.now() }, null, 2), 'utf-8')
 
-  const config = await fs.readJson(rcPath)
+  let config: Record<string, any> = {}
+  try {
+    config = fs.readJsonSync(rcPath)
+  }
+  catch (e: any) {}
 
   if (options.get) {
     const value = get(config, options.get)
@@ -31,12 +35,12 @@ export default async function configure(options: ConfigOption) {
 
     set(config, path, formatValue)
 
-    await fs.writeFile(rcPath, JSON.stringify(config, null, 2), 'utf-8')
+    fs.writeFileSync(rcPath, JSON.stringify(config, null, 2), 'utf-8')
   }
 
   if (options.delete) {
     unset(config, options.delete)
-    await fs.writeFile(rcPath, JSON.stringify(config, null, 2), 'utf-8')
+    fs.writeFileSync(rcPath, JSON.stringify(config, null, 2), 'utf-8')
   }
 
   if (options.list)
