@@ -2,7 +2,7 @@
 import fs from 'fs-extra'
 import type { ConfigOption } from '../types'
 import { get, set, unset } from '../utils/object'
-import { rcPath } from '../shared'
+import { openaiModels, rcPath } from '../shared'
 import { version } from '../../package.json'
 
 export default function configure(options: ConfigOption) {
@@ -22,6 +22,11 @@ export default function configure(options: ConfigOption) {
 
   if (options.set) {
     const [path, value] = options.set
+
+    if (path === 'openaiModel' && !openaiModels.includes(value)) {
+      console.error(`error: option '--openaiModel <value>' argument '${value}' is invalid. Allowed choices are ${openaiModels.join(', ')}.`)
+      process.exit(1)
+    }
 
     let formatValue: any
     if (value.match('[0-9]'))

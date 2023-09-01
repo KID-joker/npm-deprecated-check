@@ -19,3 +19,5 @@ export const getGlobalConfig = function () {
   }
   return config
 }
+
+export const openaiModels = ['gpt-3.5-turbo', 'gpt-4']

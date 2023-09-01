@@ -6,9 +6,10 @@ import checkGlobal from './io/global'
 import checkPackage from './io/package'
 import checkConfig from './io/config'
 import type { ConfigOption, GlobalOption, OpenaiOption, PackageOption } from './types'
+import { openaiModels } from './shared'
 
 const gptOption = new Option('--openaiKey <value>', 'recommend alternative packages via ChatGPT')
-const gptModelOption = new Option('--openaiModel <value>', 'ChatGPT model, choices: [gpt-3.5, gpt-4]').choices(['gpt-3.5', 'gpt-4']).default('gpt-3.5')
+const gptModelOption = new Option('--openaiModel <value>', `ChatGPT model, choices: [${openaiModels.join(', ')}], default: ${openaiModels[0]}`).choices(openaiModels).default(openaiModels[0])
 
 program
   .version(`npm-deprecated-check ${version}`)
@@ -26,7 +27,7 @@ program
 program
   .command('global')
   .description('check global packages, default: npm')
-  .addOption(new Option('-m, --manger <value>', 'check specified package manger, choices: [npm, yarn, pnpm]').choices(['npm', 'yarn', 'pnpm']).default('npm'))
+  .addOption(new Option('-m, --manger <value>', 'check specified package manger, choices: [npm, yarn, pnpm], default: npm').choices(['npm', 'yarn', 'pnpm']).default('npm'))
   .addOption(gptOption)
   .addOption(gptModelOption)
   .action((globalOption: GlobalOption) => {
@@ -39,7 +40,7 @@ program
   .option('-r, --range <value>', 'check specified versions')
   .addOption(gptOption)
   .addOption(gptModelOption)
-  .action((packageName: string, option: { range?: string }) => {
+  .action((packageName: string, option: { range?: string; openaiKey?: string; openaiModel: string }) => {
     const packageOption: PackageOption = {
       packageName,
       ...option,

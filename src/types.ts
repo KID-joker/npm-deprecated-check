@@ -1,10 +1,10 @@
 export interface OpenaiOption {
   openaiKey?: string
-  openaiModel?: string
+  openaiModel: string
 }
 
 export interface GlobalOption extends OpenaiOption {
-  manager?: string
+  manager: string
 }
 
 export interface PackageOption extends OpenaiOption {
