@@ -15,7 +15,9 @@
     "cli",
     "cli-tool",
     "dependencies",
-    "deprecated"
+    "deprecated",
+    "OpenAI",
+    "ai-recommend"
   ],
   "main": "dist/cli.mjs",
   "module": "dist/cli.mjs",
