@@ -6,11 +6,11 @@ import checkGlobal from './io/global'
 import checkPackage from './io/package'
 import checkConfig from './io/config'
 import type { ConfigOption, GlobalOption, OpenaiOption, PackageOption } from './types'
-import { openaiBaseURL, openaiModels } from './shared'
+import { openaiModels } from './shared'
 
 const gptOption = new Option('--openaiKey <value>', 'recommend alternative packages via ChatGPT')
-const gptModelOption = new Option('--openaiModel <value>', 'ChatGPT model').choices(openaiModels).default(openaiModels[0])
-const gptBaseURL = new Option('--openaiBaseURL <value>', 'override the default base URL for the API').default(openaiBaseURL)
+const gptModelOption = new Option('--openaiModel <value>', 'ChatGPT model').choices(openaiModels)
+const gptBaseURL = new Option('--openaiBaseURL <value>', 'override the default base URL for the API')
 
 program
   .version(`npm-deprecated-check ${version}`)
@@ -44,7 +44,7 @@ program
   .addOption(gptOption)
   .addOption(gptModelOption)
   .addOption(gptBaseURL)
-  .action((packageName: string, option: { range?: string; openaiKey?: string; openaiModel: string; openaiBaseURL: string }) => {
+  .action((packageName: string, option: { range?: string; openaiKey?: string; openaiModel?: string; openaiBaseURL?: string }) => {
     const packageOption: PackageOption = {
       packageName,
       ...option,

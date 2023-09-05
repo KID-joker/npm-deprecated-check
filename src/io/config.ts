@@ -29,7 +29,7 @@ export default function configure(options: ConfigOption) {
     }
 
     let formatValue: any
-    if (value.match('[0-9]'))
+    if (!Number.isNaN(parseInt(value)))
       formatValue = parseInt(value)
     else if (value === 'true')
       formatValue = true

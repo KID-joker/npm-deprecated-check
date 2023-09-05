@@ -1,12 +1,18 @@
 import fetch from 'node-fetch'
 import chalk from 'chalk'
-import { getGlobalConfig, openaiModels } from './shared'
+import { getGlobalConfig, openaiBaseURL, openaiModels } from './shared'
 import type { OpenaiOption } from './types'
 import { log } from './utils/console'
 import { safeJSON } from './utils/object'
 
+const defaultConfig = {
+  openaiModel: openaiModels[0],
+  openaiBaseURL,
+}
+const globalConfig = getGlobalConfig()
+
 export async function recommendDependencies(packageName: string, openaiOptions: OpenaiOption) {
-  const config = Object.assign(getGlobalConfig(), openaiOptions)
+  const config = Object.assign(defaultConfig, globalConfig, openaiOptions)
 
   if (!config.openaiKey)
     return null

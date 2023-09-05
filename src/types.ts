@@ -1,7 +1,7 @@
 export interface OpenaiOption {
   openaiKey?: string
-  openaiModel: string
-  openaiBaseURL: string
+  openaiModel?: string
+  openaiBaseURL?: string
 }
 
 export interface GlobalOption extends OpenaiOption {
