@@ -6,10 +6,11 @@ import checkGlobal from './io/global'
 import checkPackage from './io/package'
 import checkConfig from './io/config'
 import type { ConfigOption, GlobalOption, OpenaiOption, PackageOption } from './types'
-import { openaiModels } from './shared'
+import { openaiBaseURL, openaiModels } from './shared'
 
 const gptOption = new Option('--openaiKey <value>', 'recommend alternative packages via ChatGPT')
-const gptModelOption = new Option('--openaiModel <value>', `ChatGPT model, choices: [${openaiModels.join(', ')}], default: ${openaiModels[0]}`).choices(openaiModels).default(openaiModels[0])
+const gptModelOption = new Option('--openaiModel <value>', 'ChatGPT model').choices(openaiModels).default(openaiModels[0])
+const gptBaseURL = new Option('--openaiBaseURL <value>', 'override the default base URL for the API').default(openaiBaseURL)
 
 program
   .version(`npm-deprecated-check ${version}`)
@@ -20,6 +21,7 @@ program
   .description('check the packages of the current project')
   .addOption(gptOption)
   .addOption(gptModelOption)
+  .addOption(gptBaseURL)
   .action((option: OpenaiOption) => {
     checkCurrent(option)
   })
@@ -27,9 +29,10 @@ program
 program
   .command('global')
   .description('check global packages, default: npm')
-  .addOption(new Option('-m, --manger <value>', 'check specified package manger, choices: [npm, yarn, pnpm], default: npm').choices(['npm', 'yarn', 'pnpm']).default('npm'))
+  .addOption(new Option('-m, --manger <value>', 'check specified package manger').choices(['npm', 'yarn', 'pnpm']).default('npm'))
   .addOption(gptOption)
   .addOption(gptModelOption)
+  .addOption(gptBaseURL)
   .action((globalOption: GlobalOption) => {
     checkGlobal(globalOption)
   })
@@ -40,7 +43,8 @@ program
   .option('-r, --range <value>', 'check specified versions')
   .addOption(gptOption)
   .addOption(gptModelOption)
-  .action((packageName: string, option: { range?: string; openaiKey?: string; openaiModel: string }) => {
+  .addOption(gptBaseURL)
+  .action((packageName: string, option: { range?: string; openaiKey?: string; openaiModel: string; openaiBaseURL: string }) => {
     const packageOption: PackageOption = {
       packageName,
       ...option,

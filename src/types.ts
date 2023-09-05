@@ -1,6 +1,7 @@
 export interface OpenaiOption {
   openaiKey?: string
   openaiModel: string
+  openaiBaseURL: string
 }
 
 export interface GlobalOption extends OpenaiOption {
@@ -24,7 +25,7 @@ export interface PackageInfo {
   version: string
   time: string
   deprecated: string | undefined
-  recommend: Array<string> | null
+  recommend: Array<string> | string | null
 }
 
 export interface PackageVersions {

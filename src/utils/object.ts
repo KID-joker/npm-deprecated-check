@@ -47,3 +47,12 @@ export function unset(target: Record<string, any>, path: string) {
       delete parent[key]
   }
 }
+
+export const safeJSON = (text: string) => {
+  try {
+    return JSON.parse(text)
+  }
+  catch (err) {
+    return undefined
+  }
+}
