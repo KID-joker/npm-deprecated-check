@@ -8,11 +8,17 @@ import { recommendDependencies } from './chatgpt'
 import { error, log } from './utils/console'
 
 export async function checkDependencies(dependencies: Record<string, VersionOrRange>, config: OpenaiOption) {
-  startSpinner()
-  const resultList = await Promise.all(Object.keys(dependencies).map(packageName => getPackageInfo(packageName, dependencies[packageName], config)))
-  stopSpinner()
-  for (const result of resultList) {
-    if (result && result.deprecated) {
+  const packageList = Object.keys(dependencies)
+  for (const packageName of packageList) {
+    startSpinner()
+    const result = await getPackageInfo(packageName, dependencies[packageName], config)
+    stopSpinner()
+    if (result.error) {
+      error(result.error)
+      log()
+    }
+
+    if (result.deprecated) {
       log(`${chalk.bgYellow(' WARN ')} ${chalk.yellow(`${result.name}@${result.version}: `)}${result.time}`)
       log(chalk.red(`deprecated: ${result.deprecated}`))
 
@@ -33,22 +39,21 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
 
 async function getPackageInfo(packageName: string, versionOrRange: VersionOrRange, config: OpenaiOption) {
   let packageRes
-
   try {
     const response = await fetch(registry + packageName)
     packageRes = await response.json() as PackageVersions
 
     if (!packageRes)
-      return error(`${packageName}: Could not find the package!`)
+      return { name: packageName, error: `${packageName}: Could not find the package!` }
   }
   catch (e: any) {
-    return error(`${packageName}: ${e.message}`)
+    return { name: packageName, error: `${packageName}: ${e.message}` }
   }
 
   const version: string | null = semver.maxSatisfying(Object.keys(packageRes.versions), versionOrRange.range || '*')
 
   if (!version || !packageRes.versions[version])
-    return error(`${packageName}: Please enter the correct range!`)
+    return { name: packageName, error: `${packageName}: Please enter the correct range!` }
 
   const deprecated = packageRes.versions[version].deprecated
   const recommend = deprecated ? await recommendDependencies(packageRes.name, config) : null

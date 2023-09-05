@@ -22,10 +22,11 @@ export interface ConfigOption {
 
 export interface PackageInfo {
   name: string
-  version: string
-  time: string
-  deprecated: string | undefined
-  recommend: Array<string> | string | null
+  version?: string
+  time?: string
+  deprecated?: string | undefined
+  recommend?: Array<string> | string | null
+  error?: string
 }
 
 export interface PackageVersions {
