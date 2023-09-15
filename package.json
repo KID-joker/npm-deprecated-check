@@ -27,6 +27,9 @@
   "files": [
     "dist"
   ],
+	"engines": {
+		"node": ">=10.16"
+	},
   "preferGlobal": true,
   "scripts": {
     "build": "unbuild",
@@ -36,14 +39,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@pnpm/lockfile-file": "^6.0.2",
-    "@pnpm/logger": "^5.0.0",
+    "@pnpm/lockfile-file": "^3.2.1",
+    "@pnpm/logger": "^3.2.3",
     "@yarnpkg/lockfile": "^1.1.0",
-    "chalk": "^5.1.2",
-    "commander": "^11.0.0",
-    "fs-extra": "^10.1.0",
-    "node-fetch": "^3.3.1",
-    "ora": "^6.1.2",
+    "chalk": "^4.1.2",
+    "commander": "^7.2.0",
+    "fs-extra": "^9.1.0",
+    "node-fetch": "^2.7.0",
+    "ora": "^5.4.1",
     "semver": "^7.3.8"
   },
   "devDependencies": {
@@ -51,6 +54,7 @@
     "@antfu/utils": "^0.5.2",
     "@types/fs-extra": "^9.0.13",
     "@types/node": "^18.7.18",
+    "@types/node-fetch": "^2.6.5",
     "@types/semver": "^7.3.13",
     "@types/yarnpkg__lockfile": "^1.1.5",
     "bumpp": "^8.2.1",
