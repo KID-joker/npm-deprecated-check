@@ -27,9 +27,9 @@
   "files": [
     "dist"
   ],
-	"engines": {
-		"node": ">=10.16"
-	},
+  "engines": {
+    "node": ">=10.16"
+  },
   "preferGlobal": true,
   "scripts": {
     "build": "unbuild",

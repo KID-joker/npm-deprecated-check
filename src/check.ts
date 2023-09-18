@@ -50,9 +50,9 @@ async function getPackageInfo(packageName: string, versionOrRange: VersionOrRang
     return { name: packageName, error: `${packageName}: ${e.message}` }
   }
 
-  const version: string | null = versionOrRange.range
+  const version: string | null = versionOrRange.version || (versionOrRange.range
     ? packageRes['dist-tags'][versionOrRange.range] || semver.maxSatisfying(Object.keys(packageRes.versions), versionOrRange.range || '*')
-    : packageRes['dist-tags'].latest
+    : packageRes['dist-tags'].latest)
 
   if (!version || !packageRes.versions[version])
     return { name: packageName, error: `${packageName}: Please enter the correct range!` }
