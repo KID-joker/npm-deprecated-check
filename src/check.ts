@@ -2,7 +2,7 @@ import chalk from 'chalk'
 import fetch from 'node-fetch'
 import semver from 'semver'
 import type { OpenaiOption, PackageInfo, PackageVersions, VersionOrRange } from './types'
-import { registry } from './utils/exec'
+import { getRegistry } from './utils/exec'
 import { startSpinner, stopSpinner } from './utils/spinner'
 import { recommendDependencies } from './chatgpt'
 import { error, log } from './utils/console'
@@ -40,7 +40,7 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
 async function getPackageInfo(packageName: string, versionOrRange: VersionOrRange, config: OpenaiOption) {
   let packageRes
   try {
-    const response = await fetch(registry + packageName)
+    const response = await fetch(getRegistry() + packageName)
     packageRes = await response.json() as PackageVersions
 
     if (!packageRes)
