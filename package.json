@@ -1,7 +1,7 @@
 {
   "name": "npm-deprecated-check",
   "type": "module",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Check for deprecated packages",
   "author": "KID-joker <kid_joker@126.com>",
   "license": "MIT",
@@ -33,7 +33,7 @@
   "preferGlobal": true,
   "scripts": {
     "build": "unbuild",
-    "dev": "esno ./src/cli.ts",
+    "dev": "tsx ./src/cli.ts",
     "lint": "eslint . --fix",
     "release": "bumpp && pnpm publish --no-git-checks",
     "typecheck": "tsc --noEmit"
@@ -47,20 +47,20 @@
     "fs-extra": "^9.1.0",
     "node-fetch": "^2.7.0",
     "ora": "^5.4.1",
-    "semver": "^7.3.8"
+    "semver": "^7.6.3"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.27.0",
     "@antfu/utils": "^0.5.2",
     "@types/fs-extra": "^9.0.13",
-    "@types/node": "^18.7.18",
-    "@types/node-fetch": "^2.6.5",
-    "@types/semver": "^7.3.13",
-    "@types/yarnpkg__lockfile": "^1.1.5",
+    "@types/node": "^18.19.54",
+    "@types/node-fetch": "^2.6.11",
+    "@types/semver": "^7.5.8",
+    "@types/yarnpkg__lockfile": "^1.1.9",
     "bumpp": "^8.2.1",
-    "eslint": "^8.23.1",
-    "esno": "^0.16.3",
-    "typescript": "^4.8.3",
+    "eslint": "^8.57.1",
+    "tsx": "^4.19.1",
+    "typescript": "^4.9.5",
     "unbuild": "^0.8.11"
   }
 }
