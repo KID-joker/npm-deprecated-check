@@ -15,6 +15,6 @@ export const getGlobalConfig = function () {
   }
 }
 
-export const openaiModels = ['gpt-3.5-turbo', 'gpt-4']
+export const openaiModels = ['gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo', 'gpt-4o-mini', 'gpt-4o']
 
 export const openaiBaseURL = 'https://api.openai.com/v1'
