@@ -39,7 +39,7 @@ For `OpenAI` config:
 ```bash
 Options:
   --openaiKey <value>      recommend alternative packages via ChatGPT
-  --openaiModel <value>    ChatGPT model (choices: "gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o")
+  --openaiModel <value>    ChatGPT model (choices: "gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o-mini", "gpt-4o")
   --openaiBaseURL <value>  override the default base URL for the API
 ```
 
