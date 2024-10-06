@@ -10,8 +10,7 @@ export function getRegistry() {
     return registry
 
   try {
-    const result = execCommand('npm config get registry').trim()
-    registry = result.endsWith('/') ? result : `${result}/`
+    registry = execCommand('npm config get registry').trim()
   }
   catch {
     registry = 'https://registry.npmjs.org/'

@@ -1,13 +1,14 @@
 import chalk from 'chalk'
 import fetch from 'node-fetch'
 import semver from 'semver'
-import type { OpenaiOption, PackageInfo, PackageVersions, VersionOrRange } from './types'
+import type { CommonOption, PackageInfo, PackageVersions, VersionOrRange } from './types'
 import { getRegistry } from './utils/exec'
 import { startSpinner, stopSpinner } from './utils/spinner'
 import { recommendDependencies } from './chatgpt'
 import { error, log } from './utils/console'
+import { getGlobalConfig } from './shared'
 
-export async function checkDependencies(dependencies: Record<string, VersionOrRange>, config: OpenaiOption) {
+export async function checkDependencies(dependencies: Record<string, VersionOrRange>, config: CommonOption) {
   const packageList = Object.keys(dependencies)
   for (const packageName of packageList) {
     startSpinner()
@@ -37,10 +38,13 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
   }
 }
 
-async function getPackageInfo(packageName: string, versionOrRange: VersionOrRange, config: OpenaiOption) {
+const globalConfig = getGlobalConfig()
+async function getPackageInfo(packageName: string, versionOrRange: VersionOrRange, config: CommonOption) {
   let packageRes
   try {
-    const response = await fetch(getRegistry() + packageName)
+    const registry = config.registry || globalConfig.registry || getRegistry()
+    const _registry = registry.endsWith('/') ? registry : `${registry}/`
+    const response = await fetch(_registry + packageName)
     packageRes = await response.json() as PackageVersions
 
     if (!packageRes)

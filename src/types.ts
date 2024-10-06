@@ -4,11 +4,15 @@ export interface OpenaiOption {
   openaiBaseURL?: string
 }
 
-export interface GlobalOption extends OpenaiOption {
+export interface CommonOption extends OpenaiOption {
+  registry: string
+}
+
+export interface GlobalOption extends CommonOption {
   manager: string
 }
 
-export interface PackageOption extends OpenaiOption {
+export interface PackageOption extends CommonOption {
   packageName: string
   range?: string
 }

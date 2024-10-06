@@ -5,9 +5,10 @@ import checkCurrent from './io/current'
 import checkGlobal from './io/global'
 import checkPackage from './io/package'
 import checkConfig from './io/config'
-import type { ConfigOption, GlobalOption, OpenaiOption, PackageOption } from './types'
+import type { CommonOption, ConfigOption, GlobalOption, PackageOption } from './types'
 import { openaiModels } from './shared'
 
+const registryOption = new Option('--registry <value>', 'specify registry URL')
 const gptOption = new Option('--openaiKey <value>', 'recommend alternative packages via ChatGPT')
 const gptModelOption = new Option('--openaiModel <value>', 'ChatGPT model').choices(openaiModels)
 const gptBaseURL = new Option('--openaiBaseURL <value>', 'override the default base URL for the API')
@@ -19,10 +20,11 @@ program
 program
   .command('current')
   .description('check the packages of the current project')
+  .addOption(registryOption)
   .addOption(gptOption)
   .addOption(gptModelOption)
   .addOption(gptBaseURL)
-  .action((option: OpenaiOption) => {
+  .action((option: CommonOption) => {
     checkCurrent(option)
   })
 
@@ -30,6 +32,7 @@ program
   .command('global')
   .description('check global packages, default: npm')
   .addOption(new Option('-m, --manger <value>', 'check specified package manger').choices(['npm', 'yarn', 'pnpm']).default('npm'))
+  .addOption(registryOption)
   .addOption(gptOption)
   .addOption(gptModelOption)
   .addOption(gptBaseURL)
@@ -41,10 +44,11 @@ program
   .command('package <packageName>')
   .description('check for specified package')
   .option('-r, --range <value>', 'check specified versions')
+  .addOption(registryOption)
   .addOption(gptOption)
   .addOption(gptModelOption)
   .addOption(gptBaseURL)
-  .action((packageName: string, option: { range?: string; openaiKey?: string; openaiModel?: string; openaiBaseURL?: string }) => {
+  .action((packageName: string, option: { range?: string } & CommonOption) => {
     const packageOption: PackageOption = {
       packageName,
       ...option,
@@ -62,7 +66,7 @@ program
   .action((option: Record<string, any>, command: Command) => {
     if (Object.keys(option).length === 0) {
       command.outputHelp()
-      process.exit(1)
+      process.exit(0)
     }
 
     const configOption: ConfigOption = {}
