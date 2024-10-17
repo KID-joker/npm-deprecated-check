@@ -12,7 +12,10 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
   const npmLock = {
     path: npmLockPath,
     read() {
-      const { dependencies } = fs.readJsonSync(this.path)
+      const lockfileContent = fs.readJsonSync(this.path)
+      let dependencies = lockfileContent.dependencies
+      if (lockfileContent.lockfileVersion > 1)
+        dependencies = lockfileContent.packages[''].dependencies
       const result: Record<string, VersionOrRange> = {}
       for (const packageName in packages)
         dependencies[packageName] && (result[packageName] = { version: dependencies[packageName].version })
