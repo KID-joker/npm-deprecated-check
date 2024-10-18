@@ -14,11 +14,17 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
     read() {
       const lockfileContent = fs.readJsonSync(this.path)
       let dependencies = lockfileContent.dependencies
-      if (lockfileContent.lockfileVersion > 1)
-        dependencies = lockfileContent.packages[''].dependencies
+      let packageNamePrefix = ''
+      if (lockfileContent.lockfileVersion > 1) {
+        dependencies = lockfileContent.packages
+        packageNamePrefix = 'node_modules/'
+      }
       const result: Record<string, VersionOrRange> = {}
-      for (const packageName in packages)
-        dependencies[packageName] && (result[packageName] = { version: dependencies[packageName].version })
+      for (const packageName in packages) {
+        const dependencyKey = packageNamePrefix + packageName
+        if (dependencies[dependencyKey])
+          result[packageName] = { version: dependencies[dependencyKey].version }
+      }
 
       return result
     },
