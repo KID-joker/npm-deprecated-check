@@ -10,8 +10,7 @@ export const getGlobalConfig = function () {
   try {
     return fs.readJSONSync(rcPath) || {}
   }
-  // eslint-disable-next-line unused-imports/no-unused-vars
-  catch (e: any) {
+  catch {
     return {}
   }
 }
