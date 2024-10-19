@@ -14,8 +14,7 @@ export default function configure(options: ConfigOption) {
   try {
     config = fs.readJsonSync(rcPath)
   }
-  // eslint-disable-next-line unused-imports/no-unused-vars
-  catch (e: any) {}
+  catch {}
 
   if (options.get) {
     const value = get(config, options.get)
