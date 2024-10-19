@@ -1,5 +1,6 @@
-import type { ConfigOption } from '../types'
 /* eslint-disable no-console */
+import type { ConfigOption } from '../types'
+import process from 'node:process'
 import fs from 'fs-extra'
 import { version } from '../../package.json'
 import { openaiModels, rcPath } from '../shared'
@@ -13,6 +14,7 @@ export default function configure(options: ConfigOption) {
   try {
     config = fs.readJsonSync(rcPath)
   }
+  // eslint-disable-next-line unused-imports/no-unused-vars
   catch (e: any) {}
 
   if (options.get) {

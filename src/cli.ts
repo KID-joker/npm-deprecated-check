@@ -1,5 +1,6 @@
 import type { Command } from 'commander'
 import type { CommonOption, ConfigOption, GlobalOption, PackageOption } from './types'
+import process from 'node:process'
 import { Option, program } from 'commander'
 import { version } from '../package.json'
 import checkConfig from './io/config'

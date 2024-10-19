@@ -52,6 +52,7 @@ export function safeJSON(text: string) {
   try {
     return JSON.parse(text)
   }
+  // eslint-disable-next-line unused-imports/no-unused-vars
   catch (err) {
     return undefined
   }

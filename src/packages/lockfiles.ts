@@ -28,7 +28,8 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
 
       return result
     },
-  }; const yarnLock = {
+  }
+  const yarnLock = {
     path: yarnLockPath,
     read() {
       const content = fs.readFileSync(this.path).toString('utf-8')
@@ -39,7 +40,8 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
 
       return result
     },
-  }; const pnpmLock = {
+  }
+  const pnpmLock = {
     path: pnpmLockPath,
     async read() {
       const content = await readWantedLockfile(resolve(this.path, '..'), { ignoreIncompatible: false })
