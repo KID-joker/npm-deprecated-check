@@ -1,11 +1,12 @@
 import type { Command } from 'commander'
+import type { CommonOption, ConfigOption, GlobalOption, PackageOption } from './types'
+import process from 'node:process'
 import { Option, program } from 'commander'
 import { version } from '../package.json'
+import checkConfig from './io/config'
 import checkCurrent from './io/current'
 import checkGlobal from './io/global'
 import checkPackage from './io/package'
-import checkConfig from './io/config'
-import type { CommonOption, ConfigOption, GlobalOption, PackageOption } from './types'
 import { openaiModels } from './shared'
 
 const registryOption = new Option('--registry <value>', 'specify registry URL')

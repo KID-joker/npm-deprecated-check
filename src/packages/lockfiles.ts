@@ -1,8 +1,8 @@
-import { resolve } from 'path'
+import type { VersionOrRange } from '../types'
+import { resolve } from 'node:path'
 import { readWantedLockfile } from '@pnpm/lockfile-file'
 import lockfile from '@yarnpkg/lockfile'
 import fs from 'fs-extra'
-import type { VersionOrRange } from '../types'
 
 const npmLockPath = resolve('./package-lock.json')
 const yarnLockPath = resolve('./yarn.lock')
@@ -28,7 +28,8 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
 
       return result
     },
-  }; const yarnLock = {
+  }
+  const yarnLock = {
     path: yarnLockPath,
     read() {
       const content = fs.readFileSync(this.path).toString('utf-8')
@@ -39,7 +40,8 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
 
       return result
     },
-  }; const pnpmLock = {
+  }
+  const pnpmLock = {
     path: pnpmLockPath,
     async read() {
       const content = await readWantedLockfile(resolve(this.path, '..'), { ignoreIncompatible: false })

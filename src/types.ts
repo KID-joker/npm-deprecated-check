@@ -34,10 +34,10 @@ export interface PackageInfo {
 }
 
 export interface PackageVersions {
-  name: string
-  time: Record<string, string>
+  'name': string
+  'time': Record<string, string>
   'dist-tags': Record<string, string>
-  versions: {
+  'versions': {
     [version: string]: {
       name: string
       version: string

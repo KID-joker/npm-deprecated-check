@@ -1,5 +1,5 @@
-import { checkDependencies } from '../check'
 import type { GlobalOption } from '../types'
+import { checkDependencies } from '../check'
 import { execCommand } from '../utils/exec'
 
 const yarnRegexp = /info "(.+)" has binaries/g
@@ -19,7 +19,8 @@ export default function checkGlobal(options: GlobalOption) {
       const iterator = Array.from(result.matchAll(yarnRegexp), (m: string[]) => m[1])
       for (const dependency of iterator) {
         const index = dependency.lastIndexOf('@')
-        const packageName = dependency.slice(0, index); const version = dependency.slice(index + 1)
+        const packageName = dependency.slice(0, index)
+        const version = dependency.slice(index + 1)
         dependencies[packageName] = { version }
       }
     }
