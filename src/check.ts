@@ -1,12 +1,12 @@
+import type { CommonOption, PackageInfo, PackageVersions, VersionOrRange } from './types'
 import chalk from 'chalk'
 import fetch from 'node-fetch'
 import semver from 'semver'
-import type { CommonOption, PackageInfo, PackageVersions, VersionOrRange } from './types'
+import { recommendDependencies } from './chatgpt'
+import { getGlobalConfig } from './shared'
+import { error, log } from './utils/console'
 import { getRegistry } from './utils/exec'
 import { startSpinner, stopSpinner } from './utils/spinner'
-import { recommendDependencies } from './chatgpt'
-import { error, log } from './utils/console'
-import { getGlobalConfig } from './shared'
 
 export async function checkDependencies(dependencies: Record<string, VersionOrRange>, config: CommonOption) {
   const packageList = Object.keys(dependencies)

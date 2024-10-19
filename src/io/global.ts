@@ -1,5 +1,5 @@
-import { checkDependencies } from '../check'
 import type { GlobalOption } from '../types'
+import { checkDependencies } from '../check'
 import { execCommand } from '../utils/exec'
 
 const yarnRegexp = /info "(.+)" has binaries/g

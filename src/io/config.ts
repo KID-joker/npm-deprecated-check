@@ -1,9 +1,9 @@
+import type { ConfigOption } from '../types'
 /* eslint-disable no-console */
 import fs from 'fs-extra'
-import type { ConfigOption } from '../types'
-import { get, set, unset } from '../utils/object'
-import { openaiModels, rcPath } from '../shared'
 import { version } from '../../package.json'
+import { openaiModels, rcPath } from '../shared'
+import { get, set, unset } from '../utils/object'
 
 export default function configure(options: ConfigOption) {
   if (!fs.existsSync(rcPath))
@@ -29,8 +29,8 @@ export default function configure(options: ConfigOption) {
     }
 
     let formatValue: any
-    if (!Number.isNaN(parseInt(value)))
-      formatValue = parseInt(value)
+    if (!Number.isNaN(Number.parseInt(value)))
+      formatValue = Number.parseInt(value)
     else if (value === 'true')
       formatValue = true
     else if (value === 'false')

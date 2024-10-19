@@ -1,8 +1,8 @@
-import { resolve } from 'path'
+import type { VersionOrRange } from '../types'
+import { resolve } from 'node:path'
 import { readWantedLockfile } from '@pnpm/lockfile-file'
 import lockfile from '@yarnpkg/lockfile'
 import fs from 'fs-extra'
-import type { VersionOrRange } from '../types'
 
 const npmLockPath = resolve('./package-lock.json')
 const yarnLockPath = resolve('./yarn.lock')

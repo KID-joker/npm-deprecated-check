@@ -48,7 +48,7 @@ export function unset(target: Record<string, any>, path: string) {
   }
 }
 
-export const safeJSON = (text: string) => {
+export function safeJSON(text: string) {
   try {
     return JSON.parse(text)
   }

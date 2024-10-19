@@ -8,7 +8,7 @@
 ## Install
 
 ```bash
-$ npm install -g npm-deprecated-check
+npm install -g npm-deprecated-check
 ```
 
 ## Features
