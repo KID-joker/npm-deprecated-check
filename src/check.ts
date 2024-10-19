@@ -1,6 +1,5 @@
 import type { CommonOption, PackageInfo, PackageVersions, VersionOrRange } from './types'
 import chalk from 'chalk'
-import fetch from 'node-fetch'
 import semver from 'semver'
 import { recommendDependencies } from './chatgpt'
 import { getGlobalConfig } from './shared'

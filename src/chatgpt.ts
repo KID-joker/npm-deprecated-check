@@ -1,6 +1,5 @@
 import type { OpenaiOption } from './types'
 import chalk from 'chalk'
-import fetch from 'node-fetch'
 import { getGlobalConfig, openaiBaseURL, openaiModels } from './shared'
 import { log } from './utils/console'
 import { safeJSON } from './utils/object'
