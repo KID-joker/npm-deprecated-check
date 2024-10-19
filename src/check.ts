@@ -10,6 +10,7 @@ import { getGlobalConfig } from './shared'
 
 export async function checkDependencies(dependencies: Record<string, VersionOrRange>, config: CommonOption) {
   const packageList = Object.keys(dependencies)
+  let haveDeprecated = false
   for (const packageName of packageList) {
     startSpinner()
     const result = await getPackageInfo(packageName, dependencies[packageName], config)
@@ -20,6 +21,7 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
     }
 
     if (result.deprecated) {
+      haveDeprecated = true
       log(`${chalk.bgYellow(' WARN ')} ${chalk.yellow(`${result.name}@${result.version}: `)}${result.time}`)
       log(chalk.red(`deprecated: ${result.deprecated}`))
 
@@ -36,6 +38,8 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
       log()
     }
   }
+
+  log(chalk.green(`All dependencies retrieved successfully.${haveDeprecated ? '' : ' There are no deprecated dependencies.'}`))
 }
 
 const globalConfig = getGlobalConfig()
