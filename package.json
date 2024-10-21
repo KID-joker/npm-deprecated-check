@@ -34,8 +34,10 @@
   "scripts": {
     "build": "unbuild",
     "dev": "tsx ./src/cli.ts",
-    "lint": "eslint . --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "release": "bumpp && pnpm publish --no-git-checks",
+    "test": "node --test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
