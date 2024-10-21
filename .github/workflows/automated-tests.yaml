@@ -37,7 +37,7 @@ jobs:
       - name: Install pnpm
         run: pnpm --silent install
 
-      - name: Run tests
+      - name: Check linting
         run: pnpm run lint
 
       - name: Run tests
