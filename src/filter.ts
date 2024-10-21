@@ -8,9 +8,9 @@ export function isLocalPackage(versionRange: string) {
 }
 
 export function isURLPackage(versionRange: string) {
-  return /^https?:\/\/.+/.test(versionRange)
+  return /^https?:\/\//.test(versionRange)
 }
 
 export function isGitPackage(versionRange: string) {
-  return /.+\.git$/.test(versionRange)
+  return /\.git$/.test(versionRange)
 }
