@@ -29,13 +29,16 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
           node-version: ${{ matrix.node-version }}
           check-latest: true
-          cache: "npm"
+          cache: npm
 
       - name: Install dependencies
         run: npm install -g pnpm
 
       - name: Install pnpm
         run: pnpm --silent install
+
+      - name: Run tests
+        run: pnpm run lint
 
       - name: Run tests
         run: pnpm run test
