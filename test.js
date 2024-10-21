@@ -23,7 +23,7 @@ test('current tests', async (t) => {
 
 test('global tests', async (t) => {
   await t.test('check if no deprecation warning is shown', (_t, done) => {
-    exec('npm run dev current', (_error, stdout, _stderr) => {
+    exec('npm run dev global', (_error, stdout, _stderr) => {
       assert.ok(!/has been deprecated/.test(stdout), 'Not expected "has been deprecated" to be mentioned in deprecation warning.')
       done()
     })
