@@ -19,6 +19,13 @@ test('current tests', async (t) => {
       done()
     })
   })
+
+  await t.test('check if node version is mentioned in output', (_t, done) => {
+    exec('npm run dev current', (_error, stdout, _stderr) => {
+      assert.ok(/node version/.test(stdout), 'Expected "node version" to be mentioned in output.')
+      done()
+    })
+  })
 })
 
 test('global tests', async (t) => {

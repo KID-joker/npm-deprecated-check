@@ -6,6 +6,7 @@ import { version } from '../package.json'
 import checkConfig from './io/config'
 import checkCurrent from './io/current'
 import checkGlobal from './io/global'
+import checkNode from './io/node'
 import checkPackage from './io/package'
 import { openaiModels } from './shared'
 
@@ -26,6 +27,7 @@ program
   .addOption(gptModelOption)
   .addOption(gptBaseURL)
   .action((option: CommonOption) => {
+    checkNode()
     checkCurrent(option)
   })
 
@@ -38,6 +40,7 @@ program
   .addOption(gptModelOption)
   .addOption(gptBaseURL)
   .action((globalOption: GlobalOption) => {
+    checkNode()
     checkGlobal(globalOption)
   })
 
