@@ -2,13 +2,14 @@
 import process from 'node:process'
 import chalk from 'chalk'
 import nodeReleases from 'node-releases/data/release-schedule/release-schedule.json'
+import { coerce, major } from 'semver'
 
 function getLatestNodeVersion() {
   const versions = Object.keys(nodeReleases)
   const latestVersion = versions[versions.length - 1]
-  const versionWithoutV = latestVersion.slice(1)
-  const nodeVersion = versionWithoutV.split('.')[0]
-  return nodeVersion
+  const latestVersionSemver = coerce(latestVersion)
+  const latestMajorVersion = latestVersionSemver ? major(latestVersionSemver) : null
+  return latestMajorVersion
 }
 
 function getNodeVersion() {
@@ -19,6 +20,7 @@ function getNodeVersion() {
 
 function checkNode() {
   const nodeVersion = getNodeVersion()
+  const latestNodeVersion = getLatestNodeVersion()
   const nodeVersionData = nodeReleases[`v${nodeVersion}` as keyof typeof nodeReleases]
   let result = false
   if (nodeVersionData) {
@@ -34,8 +36,8 @@ function checkNode() {
       result = false
     }
   }
-  else if (nodeVersion > getLatestNodeVersion()) {
-    console.log(chalk.green(`Your node version (${nodeVersion}) is higher than the latest version ${getLatestNodeVersion()}.`))
+  else if (nodeVersion > latestNodeVersion) {
+    console.log(chalk.green(`Your node version (${nodeVersion}) is higher than the latest version ${latestNodeVersion}.`))
     result = true
   }
   else {
