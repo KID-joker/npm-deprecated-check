@@ -2,26 +2,18 @@
 import process from 'node:process'
 import chalk from 'chalk'
 import nodeReleases from 'node-releases/data/release-schedule/release-schedule.json'
-import { coerce, major } from 'semver'
+import { coerce, gt, major } from 'semver'
 
 function getLatestNodeVersion() {
   const versions = Object.keys(nodeReleases)
   const latestVersion = versions[versions.length - 1]
-  const latestVersionSemver = coerce(latestVersion)
-  const latestMajorVersion = latestVersionSemver ? major(latestVersionSemver) : null
-  return latestMajorVersion
-}
-
-function getNodeVersion() {
-  const nodeVersionWithoutV = process.version.slice(1)
-  const nodeVersion = nodeVersionWithoutV.split('.')[0]
-  return nodeVersion
+  return latestVersion
 }
 
 function checkNode() {
-  const nodeVersion = getNodeVersion()
-  const latestNodeVersion = getLatestNodeVersion()
-  const nodeVersionData = nodeReleases[`v${nodeVersion}` as keyof typeof nodeReleases]
+  const nodeVersion = coerce(process.version)
+  const latestNodeVersion = coerce(getLatestNodeVersion())
+  const nodeVersionData = nodeReleases[`v${major(nodeVersion)}` as keyof typeof nodeReleases]
   let result = false
   if (nodeVersionData) {
     const endDate = new Date(nodeVersionData.end)
@@ -36,12 +28,12 @@ function checkNode() {
       result = false
     }
   }
-  else if (nodeVersion > latestNodeVersion) {
-    console.log(chalk.green(`Your node version (${nodeVersion}) is higher than the latest version ${latestNodeVersion}.`))
+  else if (gt(nodeVersion, latestNodeVersion)) {
+    console.log(chalk.yellow(`Your node version (${nodeVersion}) is higher than the latest version ${latestNodeVersion}. Please update 'npm-deprecated-check'.`))
     result = true
   }
   else {
-    console.log(chalk.yellow(`Your node version (${nodeVersion}) can't be found in the release schedule.`))
+    console.log(chalk.yellow(`Your node version (${nodeVersion}) can't be found in the release schedule. Please update 'npm-deprecated-check'.`))
     result = false
   }
   return result
