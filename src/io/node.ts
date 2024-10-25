@@ -6,7 +6,11 @@ import { coerce, gt, major } from 'semver'
 
 function getLatestNodeVersion() {
   const versions = Object.keys(nodeReleases)
-  const latestVersion = versions[versions.length - 1]
+  const latestVersion = versions.reduce((_prev, _curr) => {
+    const prev = coerce(_prev)
+    const curr = coerce(_curr)
+    return gt(curr, prev) ? _curr : _prev
+  })
   return latestVersion
 }
 
