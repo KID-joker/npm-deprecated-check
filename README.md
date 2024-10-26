@@ -16,6 +16,7 @@ npm install -g npm-deprecated-check
 - Check the packages of current project, global or specified is deprecated.
 - According to the version range of lockfile and package.json.
 - Recommend alternative packages through OpenAI.
+- Additionally checks if the running node version reached End Of Life.
 
 ## Usage
 
