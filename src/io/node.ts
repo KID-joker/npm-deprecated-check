@@ -1,8 +1,11 @@
 /* eslint-disable no-console */
+import { createRequire } from 'node:module'
 import process from 'node:process'
 import chalk from 'chalk'
-import nodeReleases from 'node-releases/data/release-schedule/release-schedule.json'
 import { coerce, gt, major } from 'semver'
+
+const require = createRequire(import.meta.url)
+const nodeReleases = require('node-releases/data/release-schedule/release-schedule.json')
 
 function getLatestNodeVersion() {
   const versions = Object.keys(nodeReleases)
