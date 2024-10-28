@@ -49,8 +49,8 @@
     "fs-extra": "^9.1.0",
     "node-fetch": "^2.7.0",
     "node-releases": "^2.0.18",
-    "ora": "^5.4.1",
-    "semver": "^7.6.3"
+    "semver": "^7.6.3",
+    "yocto-spinner": "^0.1.1"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.8.0",

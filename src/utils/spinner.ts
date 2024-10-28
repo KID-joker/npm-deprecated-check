@@ -1,6 +1,6 @@
-import ora from 'ora'
+import yoctoSpinner from 'yocto-spinner'
 
-const spinner = ora('Checking')
+const spinner = yoctoSpinner({ text: 'Checking…' })
 let timer: NodeJS.Timeout
 
 export function startSpinner() {
