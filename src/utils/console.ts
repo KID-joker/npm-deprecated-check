@@ -10,7 +10,7 @@ export function log(text?: string) {
 }
 
 export function ok(text?: string) {
-  console.log(`${chalk.bgGreen('  OK  ')}  ${text ?? ''}`)
+  console.log(`${chalk.bgGreen('  OK  ')} ${text ?? ''}`)
 }
 
 export function warn(text?: string) {
