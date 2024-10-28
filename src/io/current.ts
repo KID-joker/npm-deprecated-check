@@ -3,6 +3,7 @@ import { checkDependencies } from '../check'
 import { isGitPackage, isLocalPackage, isURLPackage } from '../filter'
 import { getDependenciesOfLockfile } from '../packages/lockfiles'
 import { getDependenciesOfPackageJson } from '../packages/package_json'
+import { error } from '../utils/console'
 
 export default async function checkCurrent(options: CommonOption) {
   try {
@@ -23,6 +24,6 @@ export default async function checkCurrent(options: CommonOption) {
     checkDependencies(dependencies, options)
   }
   catch (e: any) {
-    console.error(e.message)
+    error(e.message)
   }
 }

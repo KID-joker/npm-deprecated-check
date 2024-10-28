@@ -4,7 +4,7 @@ import fetch from 'node-fetch'
 import semver from 'semver'
 import { recommendDependencies } from './chatgpt'
 import { getGlobalConfig } from './shared'
-import { error, log } from './utils/console'
+import { error, log, ok, warn } from './utils/console'
 import { getRegistry } from './utils/exec'
 import { startSpinner, stopSpinner } from './utils/spinner'
 
@@ -22,8 +22,7 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
 
     if (result.deprecated) {
       haveDeprecated = true
-      log(`${chalk.bgYellow(' WARN ')} ${chalk.yellow(`${result.name}@${result.version}: `)}${result.time}`)
-      log(chalk.red(`deprecated: ${result.deprecated}`))
+      warn(`${result.name}@${result.version}: ${result.time}\ndeprecated: ${result.deprecated}`)
 
       if (result.recommend) {
         log(chalk.green('recommended: '))
@@ -39,7 +38,7 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
     }
   }
 
-  log(chalk.green(`All dependencies retrieved successfully.${haveDeprecated ? '' : ' There are no deprecated dependencies.'}`))
+  ok(`All dependencies retrieved successfully.${haveDeprecated ? '' : ' There are no deprecated dependencies.'}`)
 }
 
 const globalConfig = getGlobalConfig()
