@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 import { createRequire } from 'node:module'
 import process from 'node:process'
-import chalk from 'chalk'
 import { coerce, gt, major } from 'semver'
 import { ok, warn } from '../utils/console'
 
