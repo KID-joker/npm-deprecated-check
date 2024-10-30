@@ -1,8 +1,7 @@
 import type { OpenaiOption } from './types'
-import chalk from 'chalk'
 import fetch from 'node-fetch'
 import { getGlobalConfig, openaiBaseURL, openaiModels } from './shared'
-import { log } from './utils/console'
+import { log, warn } from './utils/console'
 import { safeJSON } from './utils/object'
 
 const defaultConfig = {
@@ -40,7 +39,7 @@ export async function recommendDependencies(packageName: string, openaiOptions: 
     }
     catch (e: any) {
       log()
-      log(chalk.yellow(e))
+      warn(e)
       log()
     }
   }

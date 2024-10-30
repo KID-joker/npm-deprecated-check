@@ -1,9 +1,9 @@
-/* eslint-disable no-console */
 import type { ConfigOption } from '../types'
 import process from 'node:process'
 import fs from 'fs-extra'
 import { version } from '../../package.json'
 import { openaiModels, rcPath } from '../shared'
+import { error, log } from '../utils/console'
 import { get, set, unset } from '../utils/object'
 
 export default function configure(options: ConfigOption) {
@@ -18,14 +18,14 @@ export default function configure(options: ConfigOption) {
 
   if (options.get) {
     const value = get(config, options.get)
-    console.log(value)
+    log(value)
   }
 
   if (options.set) {
     const [path, value] = options.set
 
     if (path === 'openaiModel' && !openaiModels.includes(value)) {
-      console.error(`error: option '--openaiModel <value>' argument '${value}' is invalid. Allowed choices are ${openaiModels.join(', ')}.`)
+      error(`error: option '--openaiModel <value>' argument '${value}' is invalid. Allowed choices are ${openaiModels.join(', ')}.`)
       process.exit(1)
     }
 
@@ -50,5 +50,5 @@ export default function configure(options: ConfigOption) {
   }
 
   if (options.list)
-    console.log(JSON.stringify(config, null, 2))
+    log(JSON.stringify(config, null, 2))
 }

@@ -4,26 +4,27 @@ import fetch from 'node-fetch'
 import semver from 'semver'
 import { recommendDependencies } from './chatgpt'
 import { getGlobalConfig } from './shared'
-import { error, log } from './utils/console'
+import { error, log, ok, warn } from './utils/console'
 import { getRegistry } from './utils/exec'
 import { startSpinner, stopSpinner } from './utils/spinner'
 
 export async function checkDependencies(dependencies: Record<string, VersionOrRange>, config: CommonOption) {
   const packageList = Object.keys(dependencies)
   let haveDeprecated = false
+  let haveErrors = false
   for (const packageName of packageList) {
     startSpinner()
     const result = await getPackageInfo(packageName, dependencies[packageName], config)
     stopSpinner()
     if (result.error) {
+      haveErrors = true
       error(result.error)
       log()
     }
 
     if (result.deprecated) {
       haveDeprecated = true
-      log(`${chalk.bgYellow(' WARN ')} ${chalk.yellow(`${result.name}@${result.version}: `)}${result.time}`)
-      log(chalk.red(`deprecated: ${result.deprecated}`))
+      warn(`${result.name}@${result.version}: ${result.time}\ndeprecated: ${result.deprecated}`)
 
       if (result.recommend) {
         log(chalk.green('recommended: '))
@@ -39,7 +40,8 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
     }
   }
 
-  log(chalk.green(`All dependencies retrieved successfully.${haveDeprecated ? '' : ' There are no deprecated dependencies.'}`))
+  if (!haveErrors)
+    ok(`All dependencies retrieved successfully.${haveDeprecated ? '' : ' There are no deprecated dependencies.'}`)
 }
 
 const globalConfig = getGlobalConfig()
@@ -58,9 +60,14 @@ async function getPackageInfo(packageName: string, versionOrRange: VersionOrRang
     return { name: packageName, error: `${packageName}: ${e.message}` }
   }
 
+  if (!packageRes['dist-tags'])
+    return { name: packageName, error: `${packageName}: Could not find the package!` }
+
   const version: string | null = versionOrRange.version || (versionOrRange.range
-    ? packageRes['dist-tags'][versionOrRange.range] || semver.maxSatisfying(Object.keys(packageRes.versions), versionOrRange.range || '*')
-    : packageRes['dist-tags'].latest)
+    ? packageRes['dist-tags'][versionOrRange.range] || semver.maxSatisfying(Object.keys(packageRes.versions), versionOrRange.range || '*') || null
+    : packageRes['dist-tags'].latest
+      ? packageRes['dist-tags'].latest
+      : error(`${packageName}: 'latest' dist-tag does not exist!`) as unknown as string)
 
   if (!version || !packageRes.versions[version])
     return { name: packageName, error: `${packageName}: Please enter the correct range!` }

@@ -1,5 +1,6 @@
 import type { GlobalOption } from '../types'
 import { checkDependencies } from '../check'
+import { error } from '../utils/console'
 import { execCommand } from '../utils/exec'
 
 const yarnRegexp = /info "(.+)" has binaries/g
@@ -32,6 +33,6 @@ export default function checkGlobal(options: GlobalOption) {
     checkDependencies(dependencies, openaiOptions)
   }
   catch (e: any) {
-    console.error(e.message)
+    error(e.message)
   }
 }
