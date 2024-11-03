@@ -7,15 +7,15 @@ console.log('Running tests...')
 
 test('current tests', async (t) => {
   await t.todo('check if deprecation warning is shown', (_t, done) => {
-    exec('npm i request && npm run dev current', { timeout: 60000 }, (_error, stdout, _stderr) => {
-      assert.ok(/has been deprecated/.test(stdout), 'Expected "has been deprecated" to be mentioned in deprecation warning.')
+    exec('npm i request && npm run dev current', { timeout: 60000 }, (_error, _stdout, stderr) => {
+      assert.ok(/has been deprecated/.test(stderr), 'Expected "has been deprecated" to be mentioned in deprecation warning.')
       done()
     })
   })
 
   await t.test('check if no deprecation warning is shown', (_t, done) => {
-    exec('npm run dev current', (_error, stdout, _stderr) => {
-      assert.ok(!/has been deprecated/.test(stdout), 'Not expected "has been deprecated" to be mentioned in deprecation warning.')
+    exec('npm run dev current', (_error, _stdout, stderr) => {
+      assert.ok(!/has been deprecated/.test(stderr), 'Not expected "has been deprecated" to be mentioned in deprecation warning.')
       done()
     })
   })
@@ -30,8 +30,8 @@ test('current tests', async (t) => {
 
 test('global tests', async (t) => {
   await t.test('check if no deprecation warning is shown', (_t, done) => {
-    exec('npm run dev global', (_error, stdout, _stderr) => {
-      assert.ok(!/has been deprecated/.test(stdout), 'Not expected "has been deprecated" to be mentioned in deprecation warning.')
+    exec('npm run dev global', (_error, _stdout, stderr) => {
+      assert.ok(!/has been deprecated/.test(stderr), 'Not expected "has been deprecated" to be mentioned in deprecation warning.')
       done()
     })
   })
@@ -39,15 +39,15 @@ test('global tests', async (t) => {
 
 test('package tests', async (t) => {
   await t.test('check if deprecated package gets detected', (t, done) => {
-    exec('npm run dev package request', (_error, stdout, _stderr) => {
-      assert.ok(/has been deprecated/.test(stdout), 'Expected "has been deprecated" to be mentioned in deprecation warning.')
+    exec('npm run dev package request', (_error, _stdout, stderr) => {
+      assert.ok(/has been deprecated/.test(stderr), 'Expected "has been deprecated" to be mentioned in deprecation warning.')
       done()
     })
   })
 
   await t.test('check if not deprecated package does not get detected as deprecated', (t, done) => {
-    exec('npm run dev package eslint', (_error, stdout, _stderr) => {
-      assert.ok(!/has been deprecated/.test(stdout), 'Not expected "has been deprecated" to be mentioned in deprecation warning.')
+    exec('npm run dev package eslint', (_error, _stdout, stderr) => {
+      assert.ok(!/has been deprecated/.test(stderr), 'Not expected "has been deprecated" to be mentioned in deprecation warning.')
       done()
     })
   })
