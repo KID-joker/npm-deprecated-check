@@ -31,6 +31,7 @@ Commands:
   current [options]                check the packages of the current project
   global [options]                 check global packages, default: npm
   package [options] <packageName>  check for specified package
+  node                             check if used node version is deprecated (reached End Of Life)
   config [options]                 inspect and modify the config
   help [command]                   display help for command
 ```

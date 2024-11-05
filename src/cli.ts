@@ -45,6 +45,13 @@ program
   })
 
 program
+  .command('node')
+  .description('check if used node version is deprecated (reached End Of Life)')
+  .action(() => {
+    checkNode()
+  })
+
+program
   .command('package <packageName>')
   .description('check for specified package')
   .option('-r, --range <value>', 'check specified versions')
