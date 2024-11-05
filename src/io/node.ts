@@ -1,12 +1,21 @@
-import { createRequire } from 'node:module'
 import process from 'node:process'
+import fetch from 'node-fetch'
 import { coerce, gt, major } from 'semver'
 import { ok, warn } from '../utils/console'
 
-const require = createRequire(import.meta.url)
-const nodeReleases = require('node-releases/data/release-schedule/release-schedule.json')
+interface versionInfo {
+  start: string
+  lts?: string
+  maintenance?: string
+  end: string
+  codename?: string
+}
 
-function getLatestNodeVersion() {
+function getNodeReleases() {
+  return fetch('https://raw.githubusercontent.com/nodejs/Release/master/schedule.json').then(res => res.json())
+}
+
+function getLatestNodeVersion(nodeReleases: Record<string, versionInfo>) {
   const versions = Object.keys(nodeReleases)
   const latestVersion = versions.reduce((_prev, _curr) => {
     const prev = coerce(_prev)!
@@ -16,9 +25,10 @@ function getLatestNodeVersion() {
   return latestVersion
 }
 
-function checkNode() {
+async function checkNode() {
+  const nodeReleases = await getNodeReleases() as Record<string, versionInfo>
   const nodeVersion = coerce(process.version)!
-  const latestNodeVersion = coerce(getLatestNodeVersion())!
+  const latestNodeVersion = coerce(getLatestNodeVersion(nodeReleases))!
   const nodeVersionData = nodeReleases[`v${major(nodeVersion)}` as keyof typeof nodeReleases]
   if (nodeVersionData) {
     const endDate = new Date(nodeVersionData.end)

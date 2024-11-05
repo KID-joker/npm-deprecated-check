@@ -29,9 +29,6 @@ importers:
       node-fetch:
         specifier: ^2.7.0
         version: 2.7.0
-      node-releases:
-        specifier: ^2.0.18
-        version: 2.0.18
       semver:
         specifier: ^7.6.3
         version: 7.6.3
