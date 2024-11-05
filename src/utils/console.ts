@@ -14,5 +14,5 @@ export function ok(text?: string) {
 }
 
 export function warn(text?: string) {
-  console.log(`${chalk.bgYellowBright(' WARN ')} ${chalk.yellow(text ?? '')}`)
+  console.warn(`${chalk.bgYellowBright(' WARN ')} ${chalk.yellow(text ?? '')}`)
 }

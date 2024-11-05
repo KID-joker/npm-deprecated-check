@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { createRequire } from 'node:module'
 import process from 'node:process'
 import { coerce, gt, major } from 'semver'
