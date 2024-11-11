@@ -1,7 +1,15 @@
+import { createRequire } from 'node:module'
+import path from 'node:path'
 import process from 'node:process'
-import fetch from 'node-fetch'
+import { fileURLToPath } from 'node:url'
 import { coerce, gt, major } from 'semver'
 import { ok, warn } from '../utils/console'
+
+const require = createRequire(import.meta.url)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const releasesPath = path.resolve(__dirname, '../schedule.json')
+const nodeReleases = require(releasesPath)
 
 interface versionInfo {
   start: string
@@ -9,10 +17,6 @@ interface versionInfo {
   maintenance?: string
   end: string
   codename?: string
-}
-
-function getNodeReleases() {
-  return fetch('https://raw.githubusercontent.com/nodejs/Release/master/schedule.json').then(res => res.json())
 }
 
 function getLatestNodeVersion(nodeReleases: Record<string, versionInfo>) {
@@ -25,8 +29,7 @@ function getLatestNodeVersion(nodeReleases: Record<string, versionInfo>) {
   return latestVersion
 }
 
-async function checkNode() {
-  const nodeReleases = await getNodeReleases() as Record<string, versionInfo>
+function checkNode() {
   const nodeVersion = coerce(process.version)!
   const latestNodeVersion = coerce(getLatestNodeVersion(nodeReleases))!
   const nodeVersionData = nodeReleases[`v${major(nodeVersion)}` as keyof typeof nodeReleases]
