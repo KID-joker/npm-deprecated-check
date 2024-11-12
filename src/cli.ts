@@ -26,8 +26,8 @@ program
   .addOption(gptOption)
   .addOption(gptModelOption)
   .addOption(gptBaseURL)
-  .action(async (option: CommonOption) => {
-    await checkNode()
+  .action((option: CommonOption) => {
+    checkNode()
     checkCurrent(option)
   })
 
@@ -39,16 +39,16 @@ program
   .addOption(gptOption)
   .addOption(gptModelOption)
   .addOption(gptBaseURL)
-  .action(async (globalOption: GlobalOption) => {
-    await checkNode()
+  .action((globalOption: GlobalOption) => {
+    checkNode()
     checkGlobal(globalOption)
   })
 
 program
   .command('node')
   .description('check if used node version is deprecated (reached End Of Life)')
-  .action(async () => {
-    await checkNode()
+  .action(() => {
+    checkNode()
   })
 
 program

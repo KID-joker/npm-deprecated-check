@@ -32,11 +32,12 @@
   },
   "preferGlobal": true,
   "scripts": {
-    "build": "unbuild",
+    "build": "pnpm build:releases && unbuild",
+    "build:releases": "tsx ./scripts/node_releases.ts",
     "dev": "tsx ./src/cli.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "release": "bumpp && pnpm publish --no-git-checks",
+    "release": "pnpm build && bumpp && pnpm publish --no-git-checks",
     "test": "node --test",
     "typecheck": "tsc --noEmit"
   },

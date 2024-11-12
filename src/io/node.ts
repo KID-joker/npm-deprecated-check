@@ -1,6 +1,6 @@
 import process from 'node:process'
-import fetch from 'node-fetch'
 import { coerce, gt, major } from 'semver'
+import nodeReleases from '../schedule.json' assert { type: 'json' }
 import { ok, warn } from '../utils/console'
 
 interface versionInfo {
@@ -9,10 +9,6 @@ interface versionInfo {
   maintenance?: string
   end: string
   codename?: string
-}
-
-function getNodeReleases() {
-  return fetch('https://raw.githubusercontent.com/nodejs/Release/master/schedule.json').then(res => res.json())
 }
 
 function getLatestNodeVersion(nodeReleases: Record<string, versionInfo>) {
@@ -25,8 +21,7 @@ function getLatestNodeVersion(nodeReleases: Record<string, versionInfo>) {
   return latestVersion
 }
 
-async function checkNode() {
-  const nodeReleases = await getNodeReleases() as Record<string, versionInfo>
+function checkNode() {
   const nodeVersion = coerce(process.version)!
   const latestNodeVersion = coerce(getLatestNodeVersion(nodeReleases))!
   const nodeVersionData = nodeReleases[`v${major(nodeVersion)}` as keyof typeof nodeReleases]
