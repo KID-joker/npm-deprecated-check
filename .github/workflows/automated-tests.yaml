@@ -31,10 +31,10 @@ jobs:
           check-latest: true
           cache: npm
 
-      - name: Install dependencies
+      - name: Install pnpm
         run: npm install -g pnpm
 
-      - name: Install pnpm
+      - name: Install dependencies
         run: pnpm --silent install
 
       - name: Check linting
