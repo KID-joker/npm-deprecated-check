@@ -1,15 +1,7 @@
-import { createRequire } from 'node:module'
-import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 import { coerce, gt, major } from 'semver'
+import nodeReleases from '../schedule.json' assert { type: 'json' }
 import { ok, warn } from '../utils/console'
-
-const require = createRequire(import.meta.url)
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-const releasesPath = path.resolve(__dirname, '../schedule.json')
-const nodeReleases = require(releasesPath)
 
 interface versionInfo {
   start: string
