@@ -10,6 +10,8 @@ import checkNode from './io/node'
 import checkPackage from './io/package'
 import { openaiModels } from './shared'
 
+export { checkCurrent, checkGlobal, checkNode, checkPackage }
+
 const registryOption = new Option('--registry <value>', 'specify registry URL')
 const gptOption = new Option('--openaiKey <value>', 'recommend alternative packages via ChatGPT')
 const gptModelOption = new Option('--openaiModel <value>', 'ChatGPT model').choices(openaiModels)
