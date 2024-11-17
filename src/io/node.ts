@@ -42,6 +42,12 @@ function checkNode() {
   else {
     warn(`Your node version (${nodeVersion}) can't be found in the release schedule. Please update 'npm-deprecated-check'.`)
   }
+
+  return {
+    version: nodeVersion,
+    latestVersion: latestNodeVersion,
+    releases: nodeReleases,
+  }
 }
 
 export default checkNode

@@ -10,12 +10,14 @@ import { startSpinner, stopSpinner } from './utils/spinner'
 
 export async function checkDependencies(dependencies: Record<string, VersionOrRange>, config: CommonOption) {
   const packageList = Object.keys(dependencies)
+  const resultList = []
   let haveDeprecated = false
   let haveErrors = false
   for (const packageName of packageList) {
     startSpinner()
     const result = await getPackageInfo(packageName, dependencies[packageName], config)
     stopSpinner()
+    resultList.push(result)
     if (result.error) {
       haveErrors = true
       error(result.error)
@@ -42,6 +44,8 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
 
   if (!haveErrors)
     ok(`All dependencies retrieved successfully.${haveDeprecated ? '' : ' There are no deprecated dependencies.'}`)
+
+  return resultList
 }
 
 const globalConfig = getGlobalConfig()

@@ -30,7 +30,7 @@ export default function checkGlobal(options: GlobalOption) {
       dependencies = result.dependencies
     }
 
-    checkDependencies(dependencies, openaiOptions)
+    return checkDependencies(dependencies, openaiOptions)
   }
   catch (e: any) {
     error(e.message)
