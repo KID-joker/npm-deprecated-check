@@ -21,7 +21,7 @@ export default async function checkCurrent(options: CommonOption) {
 
     const dependencies = Object.assign(npmDependencies, dependenciesOfLockfile)
 
-    checkDependencies(dependencies, options)
+    return checkDependencies(dependencies, options)
   }
   catch (e: any) {
     error(e.message)
