@@ -6,16 +6,18 @@ import { test } from 'node:test'
 console.log('Running tests...')
 
 test('current tests', async (t) => {
-  await t.todo('check if deprecation warning is shown', (_t, done) => {
-    exec('npm i request && npm run dev current', { timeout: 60000 }, (_error, _stdout, stderr) => {
-      assert.ok(/has been deprecated/.test(stderr), 'Expected "has been deprecated" to be mentioned in deprecation warning.')
+  await t.test('check if no deprecation warning is shown', (_t, done) => {
+    exec('npm run dev current', (_error, _stdout, stderr) => {
+      assert.ok(!/has been deprecated/.test(stderr), 'Not expected "has been deprecated" to be mentioned in deprecation warning.')
       done()
     })
   })
 
-  await t.test('check if no deprecation warning is shown', (_t, done) => {
-    exec('npm run dev current', (_error, _stdout, stderr) => {
-      assert.ok(!/has been deprecated/.test(stderr), 'Not expected "has been deprecated" to be mentioned in deprecation warning.')
+  await t.test('check if deprecation warning is shown if deprecated package is installed', (_t, done) => {
+    exec('pnpm i request && npm run dev current', { timeout: 160000 }, (_error, _stdout, stderr) => {
+      assert.ok(/request has been deprecated/.test(stderr), 'Expected "has been deprecated" to be mentioned in deprecation warning.')
+      // Cleanup: Undo the installation
+      exec('pnpm remove request')
       done()
     })
   })
