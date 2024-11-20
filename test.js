@@ -23,9 +23,11 @@ test('current tests', async (t) => {
       await exec('npx pnpm remove request')
     })
   }
+})
 
-  await t.test('check if node version is mentioned in output', (_t, done) => {
-    exec('node ./dist/cli.mjs current', (_error, stdout, stderr) => {
+test('node tests', async (t) => {
+  await t.test('test node version deprecation check', (_t, done) => {
+    exec('node ./dist/cli.mjs node', (_error, stdout, stderr) => {
       assert.ok(/node version/.test(stdout) || /node version/.test(stderr), 'Expected "node version" to be mentioned in output.')
       done()
     })
