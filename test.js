@@ -20,7 +20,7 @@ test('current tests', async (t) => {
       const { stderr } = await exec('npx pnpm i request && node ./dist/cli.mjs current', { timeout: 160000 })
       assert.ok(/request has been deprecated/.test(stderr), 'Expected "has been deprecated" to be mentioned in deprecation warning.')
       // Cleanup: Undo the installation
-      await exec('pnpm remove request')
+      await exec('npx pnpm remove request')
     })
   }
 
