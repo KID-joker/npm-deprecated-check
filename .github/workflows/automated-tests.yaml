@@ -67,11 +67,19 @@ jobs:
           name: build-artifacts
           path: dist
 
-      - name: Run tests
+      - name: Install pnpm
         run: |
           if [[ ${{ matrix.node-version }} == 16 ]]; then
-            npx pnpm@8 install --prod
-            npx pnpm@8 run test
+            npm install -g pnpm@8
           else
-            npx pnpm run test
+            npm install -g pnpm
           fi
+
+      - name: Pnpm version
+        run: pnpm --version
+
+      - name: Install dependencies
+        run: pnpm install --prod
+
+      - name: Run tests
+        run: pnpm test

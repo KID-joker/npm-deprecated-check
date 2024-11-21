@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict'
 import { exec as execCallback } from 'node:child_process'
-import process from 'node:process'
 import { test } from 'node:test'
 import { promisify } from 'node:util'
 
@@ -15,11 +14,10 @@ test('current tests', async (t) => {
   })
 
   await t.test('check if deprecation warning is shown if deprecated package is installed', async (_t) => {
-    const pnpm = process.version.startsWith('v16') ? '--yes pnpm@8' : 'pnpm'
-    const { stderr } = await exec(`npx ${pnpm} i request && node ./dist/cli.mjs current`, { timeout: 160000 })
+    const { stderr } = await exec('pnpm i request && node ./dist/cli.mjs current', { timeout: 160000 })
     assert.ok(/request has been deprecated/.test(stderr), 'Expected "has been deprecated" to be mentioned in deprecation warning.')
     // Cleanup: Undo the installation
-    await exec(`npx ${pnpm} remove request`)
+    await exec('pnpm remove request')
   })
 })
 
