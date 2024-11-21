@@ -15,7 +15,7 @@ test('current tests', async (t) => {
   })
 
   await t.test('check if deprecation warning is shown if deprecated package is installed', async (_t) => {
-    const pnpm = process.version.startsWith('v16') ? 'pnpm@8' : 'pnpm'
+    const pnpm = process.version.startsWith('v16') ? '--yes pnpm@8' : 'pnpm'
     const { stderr } = await exec(`npx ${pnpm} i request && node ./dist/cli.mjs current`, { timeout: 160000 })
     assert.ok(/request has been deprecated/.test(stderr), 'Expected "has been deprecated" to be mentioned in deprecation warning.')
     // Cleanup: Undo the installation
