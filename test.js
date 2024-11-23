@@ -1,9 +1,6 @@
 import assert from 'node:assert/strict'
-import { exec as execCallback } from 'node:child_process'
+import { exec } from 'node:child_process'
 import { test } from 'node:test'
-import { promisify } from 'node:util'
-
-const exec = promisify(execCallback)
 
 test('current tests', async (t) => {
   await t.test('check if no deprecation warning is shown', (_t, done) => {
@@ -13,12 +10,13 @@ test('current tests', async (t) => {
     })
   })
 
-  await t.test('check if deprecation warning is shown if deprecated package is installed', async (_t) => {
-    await exec('pnpm i request --force')
-    const { stderr } = await exec('node ./dist/cli.mjs current', { timeout: 160000 })
-    assert.ok(/request has been deprecated/.test(stderr), 'Expected "has been deprecated" to be mentioned in deprecation warning.')
-    // Cleanup: Undo the installation
-    await exec('pnpm remove request')
+  await t.test('check if deprecation warning is shown if deprecated package is installed', (_t, done) => {
+    exec('pnpm i request --force && node ./dist/cli.mjs current', { timeout: 160000 }, (_error, _stdout, stderr) => {
+      assert.ok(/request has been deprecated/.test(stderr), 'Expected "has been deprecated" to be mentioned in deprecation warning.')
+      // Cleanup: Undo the installation
+      exec('pnpm remove request')
+      done()
+    })
   })
 })
 
@@ -41,14 +39,14 @@ test('global tests', async (t) => {
 })
 
 test('package tests', async (t) => {
-  await t.test('check if deprecated package gets detected', (t, done) => {
+  await t.test('check if deprecated package gets detected', (_t, done) => {
     exec('node ./dist/cli.mjs package request', (_error, _stdout, stderr) => {
       assert.ok(/has been deprecated/.test(stderr), 'Expected "has been deprecated" to be mentioned in deprecation warning.')
       done()
     })
   })
 
-  await t.test('check if not deprecated package does not get detected as deprecated', (t, done) => {
+  await t.test('check if not deprecated package does not get detected as deprecated', (_t, done) => {
     exec('node ./dist/cli.mjs package eslint', (_error, _stdout, stderr) => {
       assert.ok(!/has been deprecated/.test(stderr), 'Not expected "has been deprecated" to be mentioned in deprecation warning.')
       done()
