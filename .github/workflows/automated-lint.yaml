@@ -1,0 +1,39 @@
+name: Automated Lint
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        node-version: [22]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          cache-dependency-path: pnpm-lock.yaml
+          node-version: ${{ matrix.node-version }}
+          check-latest: true
+          cache: npm
+
+      - name: Install dependencies
+        run: npx pnpm install
+
+      - name: Check linting
+        run: npx pnpm lint
+
+      - name: Check type
+        run: npx pnpm typecheck
