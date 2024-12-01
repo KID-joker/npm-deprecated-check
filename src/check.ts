@@ -1,5 +1,5 @@
 import type { CommonOption, PackageInfo, PackageVersions, VersionOrRange } from './types'
-import chalk from 'chalk'
+import ansis from 'ansis'
 import fetch from 'node-fetch'
 import semver from 'semver'
 import { recommendDependencies } from './chatgpt'
@@ -29,10 +29,10 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
       warn(`${result.name}@${result.version}: ${result.time}\ndeprecated: ${result.deprecated}`)
 
       if (result.recommend) {
-        log(chalk.green('recommended: '))
+        log(ansis.green('recommended: '))
         if (Array.isArray(result.recommend)) {
           for (const packageName of result.recommend)
-            log(`[${chalk.magenta(packageName)}](https://www.npmjs.com/package/${packageName})`)
+            log(`[${ansis.magenta(packageName)}](https://www.npmjs.com/package/${packageName})`)
         }
         else {
           log(result.recommend)

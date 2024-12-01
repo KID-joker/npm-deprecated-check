@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
-import chalk from 'chalk'
+import ansis from 'ansis'
 
 export function error(text?: string) {
-  console.error(`${chalk.bgRed(' ERROR ')} ${chalk.red(text ?? '')}`)
+  console.error(`${ansis.bgRed(' ERROR ')} ${ansis.red(text ?? '')}`)
 }
 
 export function log(text?: string) {
@@ -10,9 +10,9 @@ export function log(text?: string) {
 }
 
 export function ok(text?: string) {
-  console.log(`${chalk.bgGreen('  OK  ')} ${text ?? ''}`)
+  console.log(`${ansis.bgGreen('  OK  ')} ${text ?? ''}`)
 }
 
 export function warn(text?: string) {
-  console.warn(`${chalk.bgYellowBright(' WARN ')} ${chalk.yellow(text ?? '')}`)
+  console.warn(`${ansis.bgYellowBright(' WARN ')} ${ansis.yellow(text ?? '')}`)
 }
