@@ -8,6 +8,10 @@ export interface CommonOption extends OpenaiOption {
   registry: string
 }
 
+export interface CurrentOption extends CommonOption {
+  ignore: string
+}
+
 export interface GlobalOption extends CommonOption {
   manager: string
 }

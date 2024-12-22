@@ -1,5 +1,5 @@
 import type { Command } from 'commander'
-import type { CommonOption, ConfigOption, GlobalOption, PackageOption } from './types'
+import type { CommonOption, ConfigOption, CurrentOption, GlobalOption, PackageOption } from './types'
 import process from 'node:process'
 import { Option, program } from 'commander'
 import { version } from '../package.json'
@@ -24,11 +24,12 @@ program
 program
   .command('current')
   .description('check the packages of the current project')
+  .addOption(new Option('--ignore <value>', 'ignore specific packages'))
   .addOption(registryOption)
   .addOption(gptOption)
   .addOption(gptModelOption)
   .addOption(gptBaseURL)
-  .action((option: CommonOption) => {
+  .action((option: CurrentOption) => {
     checkNode()
     checkCurrent(option)
   })

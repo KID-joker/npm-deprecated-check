@@ -2,6 +2,15 @@ import assert from 'node:assert/strict'
 import { exec } from 'node:child_process'
 import { test } from 'node:test'
 
+test('node tests', async (t) => {
+  await t.test('test node version deprecation check', (_t, done) => {
+    exec('node ./dist/cli.mjs node', (_error, stdout, stderr) => {
+      assert.ok(/node version/.test(stdout) || /node version/.test(stderr), 'Expected "node version" to be mentioned in output.')
+      done()
+    })
+  })
+})
+
 test('current tests', async (t) => {
   await t.test('check if no deprecation warning is shown', (_t, done) => {
     exec('node ./dist/cli.mjs current', (_error, _stdout, stderr) => {
@@ -18,12 +27,12 @@ test('current tests', async (t) => {
       done()
     })
   })
-})
 
-test('node tests', async (t) => {
-  await t.test('test node version deprecation check', (_t, done) => {
-    exec('node ./dist/cli.mjs node', (_error, stdout, stderr) => {
-      assert.ok(/node version/.test(stdout) || /node version/.test(stderr), 'Expected "node version" to be mentioned in output.')
+  await t.test('check if no deprecation warning is shown if ignore deprecated package', (_t, done) => {
+    exec('pnpm i request --force && node ./dist/cli.mjs current --ignore request', { timeout: 160000 }, (_error, _stdout, stderr) => {
+      assert.ok(!/has been deprecated/.test(stderr), 'Not expected "has been deprecated" to be mentioned in deprecation warning.')
+      // Cleanup: Undo the installation
+      exec('pnpm remove request')
       done()
     })
   })
