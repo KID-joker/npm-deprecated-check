@@ -25,6 +25,7 @@ program
   .command('current')
   .description('check the packages of the current project')
   .addOption(new Option('--ignore <value>', 'ignore specific packages'))
+  .addOption(new Option('--failfast', 'exit the program if it has been deprecated'))
   .addOption(registryOption)
   .addOption(gptOption)
   .addOption(gptModelOption)
@@ -38,6 +39,8 @@ program
   .command('global')
   .description('check global packages, default: npm')
   .addOption(new Option('-m, --manger <value>', 'check specified package manger').choices(['npm', 'yarn', 'pnpm']).default('npm'))
+  .addOption(new Option('--ignore <value>', 'ignore specific packages'))
+  .addOption(new Option('--failfast', 'exit the program if it has been deprecated'))
   .addOption(registryOption)
   .addOption(gptOption)
   .addOption(gptModelOption)
@@ -57,7 +60,8 @@ program
 program
   .command('package <packageName>')
   .description('check for specified package')
-  .option('-r, --range <value>', 'check specified versions')
+  .addOption(new Option('-r, --range <value>', 'check specified versions'))
+  .addOption(new Option('--failfast', 'exit the program if it has been deprecated'))
   .addOption(registryOption)
   .addOption(gptOption)
   .addOption(gptModelOption)
@@ -73,10 +77,10 @@ program
 program
   .command('config')
   .description('inspect and modify the config')
-  .option('-g, --get <path>', 'get value from option')
-  .option('-s, --set <path> <value>', 'set option value')
-  .option('-d, --delete <path>', 'delete option from config')
-  .option('-l, --list', 'list all options')
+  .addOption(new Option('-g, --get <path>', 'get value from option'))
+  .addOption(new Option('-s, --set <path> <value>', 'set option value'))
+  .addOption(new Option('-d, --delete <path>', 'delete option from config'))
+  .addOption(new Option('-l, --list', 'list all options'))
   .action((option: Record<string, any>, command: Command) => {
     if (Object.keys(option).length === 0) {
       command.outputHelp()

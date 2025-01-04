@@ -36,6 +36,16 @@ test('current tests', async (t) => {
       done()
     })
   })
+
+  await t.test('check if exit the program if the package is deprecated', (_t, done) => {
+    exec('pnpm i request tslint --force && node ./dist/cli.mjs current --failfast', { timeout: 160000 }, (_error, _stdout, stderr) => {
+      assert.ok(/request has been deprecated/.test(stderr), 'Expected "has been deprecated" to be mentioned in deprecation warning.')
+      assert.ok(!/tslint has been deprecated/.test(stderr), 'Expected process.exit(1), only "request has been deprecated".')
+      // Cleanup: Undo the installation
+      exec('pnpm remove request tslint')
+      done()
+    })
+  })
 })
 
 test('global tests', async (t) => {
