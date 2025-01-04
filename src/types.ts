@@ -15,6 +15,7 @@ export interface CurrentOption extends CommonOption {
 
 export interface GlobalOption extends CommonOption {
   manager: string
+  ignore: string
 }
 
 export interface PackageOption extends CommonOption {

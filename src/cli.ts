@@ -22,6 +22,13 @@ program
   .usage('<command> [options]')
 
 program
+  .command('node')
+  .description('check if used node version is deprecated (reached End Of Life)')
+  .action(() => {
+    checkNode()
+  })
+
+program
   .command('current')
   .description('check the packages of the current project')
   .addOption(new Option('--ignore <value>', 'ignore specific packages'))
@@ -48,13 +55,6 @@ program
   .action((globalOption: GlobalOption) => {
     checkNode()
     checkGlobal(globalOption)
-  })
-
-program
-  .command('node')
-  .description('check if used node version is deprecated (reached End Of Life)')
-  .action(() => {
-    checkNode()
   })
 
 program
