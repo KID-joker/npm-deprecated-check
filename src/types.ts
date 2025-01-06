@@ -6,10 +6,16 @@ export interface OpenaiOption {
 
 export interface CommonOption extends OpenaiOption {
   registry: string
+  failfast: boolean
+}
+
+export interface CurrentOption extends CommonOption {
+  ignore: string
 }
 
 export interface GlobalOption extends CommonOption {
   manager: string
+  ignore: string
 }
 
 export interface PackageOption extends CommonOption {

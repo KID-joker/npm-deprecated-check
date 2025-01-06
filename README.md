@@ -36,13 +36,40 @@ Commands:
   help [command]                   display help for command
 ```
 
-For `OpenAI` config:
+`OpenAI` config:
 
 ```bash
 Options:
-  --openaiKey <value>      recommend alternative packages via ChatGPT
-  --openaiModel <value>    ChatGPT model (choices: "gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o-mini", "gpt-4o")
-  --openaiBaseURL <value>  override the default base URL for the API
+  --openaiKey <value>       recommend alternative packages via ChatGPT
+  --openaiModel <value>     ChatGPT model (choices: "gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o-mini", "gpt-4o")
+  --openaiBaseURL <value>   override the default base URL for the API
+```
+
+For `current`:
+
+```bash
+Options:
+  --registry <value>        specify registry URL, default: https://registry.npmjs.org/
+  --ignore <value>          ignore specific packages, example: request,tslint
+  --failfast                exit the program if it has been deprecated
+```
+
+For `global`:
+
+```bash
+Options:
+  -m, --manager <value>      check specified package manager (choices: "npm", "yarn", "pnpm")
+  --registry <value>        specify registry URL, default: https://registry.npmjs.org/
+  --ignore <value>          ignore specific packages, example: request,tslint
+  --failfast                exit the program if it has been deprecated
+```
+
+For `package`:
+
+```bash
+  -r, --range <value>       check specified versions
+  --registry <value>        specify registry URL, default: https://registry.npmjs.org/
+  --failfast                exit the program if it has been deprecated
 ```
 
 You can also save them to global configuration:
