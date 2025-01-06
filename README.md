@@ -36,13 +36,6 @@ Commands:
   help [command]                   display help for command
 ```
 
-`registry` config:
-
-```bash
-Options:
-  --registry <value>        specify registry URL
-```
-
 `OpenAI` config:
 
 ```bash
@@ -56,7 +49,8 @@ For `current`:
 
 ```bash
 Options:
-  --ignore <value>          ignore specific packages
+  --registry <value>        specify registry URL, default: https://registry.npmjs.org/
+  --ignore <value>          ignore specific packages, example: request,tslint
   --failfast                exit the program if it has been deprecated
 ```
 
@@ -65,7 +59,8 @@ For `global`:
 ```bash
 Options:
   -m, --manger <value>      check specified package manger (choices: "npm", "yarn", "pnpm")
-  --ignore <value>          ignore specific packages
+  --registry <value>        specify registry URL, default: https://registry.npmjs.org/
+  --ignore <value>          ignore specific packages, example: request,tslint
   --failfast                exit the program if it has been deprecated
 ```
 
@@ -73,6 +68,7 @@ For `package`:
 
 ```bash
   -r, --range <value>       check specified versions
+  --registry <value>        specify registry URL, default: https://registry.npmjs.org/
   --failfast                exit the program if it has been deprecated
 ```
 
