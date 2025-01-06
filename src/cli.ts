@@ -45,7 +45,7 @@ program
 program
   .command('global')
   .description('check global packages, default: npm')
-  .addOption(new Option('-m, --manger <value>', 'check specified package manger').choices(['npm', 'yarn', 'pnpm']).default('npm'))
+  .addOption(new Option('-m, --manager <value>', 'check specified package manager').choices(['npm', 'yarn', 'pnpm']).default('npm'))
   .addOption(new Option('--ignore <value>', 'ignore specific packages'))
   .addOption(new Option('--failfast', 'exit the program if it has been deprecated'))
   .addOption(registryOption)

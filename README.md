@@ -58,7 +58,7 @@ For `global`:
 
 ```bash
 Options:
-  -m, --manger <value>      check specified package manger (choices: "npm", "yarn", "pnpm")
+  -m, --manager <value>      check specified package manager (choices: "npm", "yarn", "pnpm")
   --registry <value>        specify registry URL, default: https://registry.npmjs.org/
   --ignore <value>          ignore specific packages, example: request,tslint
   --failfast                exit the program if it has been deprecated

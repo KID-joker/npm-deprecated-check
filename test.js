@@ -55,6 +55,15 @@ test('global tests', async (t) => {
       done()
     })
   })
+
+  await t.test('check if no deprecation warning is shown if ignore deprecated package', (_t, done) => {
+    exec('pnpm i request --force -g && node ./dist/cli.mjs global --manager pnpm --ignore request', { timeout: 160000 }, (_error, _stdout, stderr) => {
+      assert.ok(!/has been deprecated/.test(stderr), 'Not expected "has been deprecated" to be mentioned in deprecation warning.')
+      // Cleanup: Undo the installation
+      exec('pnpm remove request -g')
+      done()
+    })
+  })
 })
 
 test('package tests', async (t) => {
