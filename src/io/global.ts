@@ -1,5 +1,6 @@
 import type { GlobalOption } from '../types'
 import { checkDependencies } from '../check'
+import { isLocalPackage } from '../filter'
 import { error } from '../utils/console'
 import { execCommand } from '../utils/exec'
 
@@ -30,7 +31,9 @@ export default function checkGlobal(options: GlobalOption) {
       dependencies = result.dependencies
     }
 
-    return checkDependencies(dependencies, openaiOptions)
+    const ignores = options.ignore?.split(',') || []
+
+    return checkDependencies(Object.fromEntries(Object.entries(dependencies).filter(([key, { version }]) => !ignores.includes(key) && !isLocalPackage(version))), openaiOptions)
   }
   catch (e: any) {
     error(e.message)

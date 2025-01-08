@@ -1,4 +1,5 @@
 import type { CommonOption, PackageInfo, PackageVersions, VersionOrRange } from './types'
+import process from 'node:process'
 import ansis from 'ansis'
 import fetch from 'node-fetch'
 import semver from 'semver'
@@ -39,6 +40,10 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
         }
       }
       log()
+
+      if (config.failfast) {
+        process.exit(1)
+      }
     }
   }
 
