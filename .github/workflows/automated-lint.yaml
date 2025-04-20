@@ -1,4 +1,4 @@
-name: Automated Lint
+name: Automated Lint and Type Check
 
 on:
   push:
@@ -12,28 +12,30 @@ permissions:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    strategy:
-      matrix:
-        node-version: [22]
+    timeout-minutes: 10
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           cache-dependency-path: pnpm-lock.yaml
-          node-version: ${{ matrix.node-version }}
+          node-version: lts/*
           check-latest: true
-          cache: npm
+          cache: pnpm
 
       - name: Install dependencies
-        run: npx pnpm install
+        run: pnpm install
 
       - name: Check linting
-        run: npx pnpm lint
+        run: pnpm lint
 
-      - name: Check type
-        run: npx pnpm typecheck
+      - name: Run TypeScript Type Check
+        run: pnpm typecheck
