@@ -1,7 +1,7 @@
 import type { VersionOrRange } from '../types'
 import { resolve } from 'node:path'
 import { readWantedLockfile } from '@pnpm/lockfile-file'
-import lockfile from '@yarnpkg/lockfile'
+import { parseSyml } from '@yarnpkg/parsers'
 import fs from 'fs-extra'
 
 const npmLockPath = resolve('./package-lock.json')
@@ -32,11 +32,11 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
   const yarnLock = {
     path: yarnLockPath,
     read() {
-      const content = fs.readFileSync(this.path).toString('utf-8')
-      const json = lockfile.parse(content)
+      const content = fs.readFileSync(this.path, 'utf-8')
+      const json = parseSyml(content)
       const result: Record<string, VersionOrRange> = {}
       for (const packageName in packages)
-        json.object[`${packageName}@${packages[packageName].range}`] && (result[packageName] = { version: json.object[`${packageName}@${packages[packageName].range}`].version })
+        json[`${packageName}@${packages[packageName].range}`] && (result[packageName] = { version: json[`${packageName}@${packages[packageName].range}`].version })
 
       return result
     },
