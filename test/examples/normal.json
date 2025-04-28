@@ -1,0 +1,7 @@
+{
+  "name": "deprecated",
+  "version": "0.0.0",
+  "dependencies": {
+    "eslint": "^9.25.1"
+  }
+}
