@@ -22,9 +22,9 @@ const uninstallCommands = {
 
 async function check(manager, t) {
   try {
-    execSync(`${installCommands[manager]} eslint`)
+    execSync(`${installCommands[manager]} eslint --loglevel verbose`)
 
-    await t.test(`check ${manager} if no deprecation warning is shown`, (_t, done) => {
+    await t.test(`check ${manager} that no deprecation warning is shown`, (_t, done) => {
       exec(`node ${cli} global --manager ${manager}`, (_error, _stdout, stderr) => {
         assert.ok(!/deprecated/.test(stderr), 'Not expected "deprecated" to be mentioned in deprecation warning.')
         done()
@@ -33,24 +33,24 @@ async function check(manager, t) {
 
     execSync(`${installCommands[manager]} tslint vue-cli`)
 
-    await t.test(`check ${manager} if deprecation warning is shown if deprecated package is installed`, (_t, done) => {
+    await t.test(`check ${manager} that deprecation warning is shown if deprecated package is installed`, (_t, done) => {
       exec(`node ${cli} global --manager ${manager}`, { timeout: 160000 }, (_error, _stdout, stderr) => {
         assert.ok(/deprecated/.test(stderr), 'Expected "deprecated" to be mentioned in deprecation warning.')
         done()
       })
     })
 
-    await t.test(`check ${manager} if no deprecation warning is shown if ignore deprecated package`, (_t, done) => {
+    await t.test(`check ${manager} that no deprecation warning is shown if ignore deprecated package`, (_t, done) => {
       exec(`node ${cli} global --manager ${manager} --ignore tslint,vue-cli`, { timeout: 160000 }, (_error, _stdout, stderr) => {
         assert.ok(!/deprecated/.test(stderr), 'Not expected "deprecated" to be mentioned in deprecation warning.')
         done()
       })
     })
 
-    await t.test(`check ${manager} if exit the program if the package is deprecated`, (_t, done) => {
-      exec(`node ${cli} global --manager ${manager} --failfast`, { timeout: 160000 }, (_error, _stdout, stderr) => {
-        assert.ok(/tslint/.test(stderr), 'Expected "deprecated" to be mentioned in deprecation warning.')
-        assert.ok(!/vue-cli/.test(stderr), 'Expected process.exit(1), only "tslint deprecated".')
+    await t.test(`check ${manager} that exit the program if the package is deprecated`, (_t, done) => {
+      exec(`node ${cli} global --manager ${manager} --failfast`, { timeout: 160000 }, (error, _stdout, stderr) => {
+        // eslint-disable-next-line no-control-regex
+        assert.ok(error.code === 1 && (stderr.match(/^\u001B\[33mdeprecated:/gm) || []).length === 1, 'Expected "WARN" to be mentioned once in deprecation warning, and process.exit(1).')
         done()
       })
     })
