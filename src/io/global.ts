@@ -4,7 +4,7 @@ import { isLocalPackage } from '../filter'
 import { error } from '../utils/console'
 import { execCommand } from '../utils/exec'
 
-const yarnRegexp = /info "(.+)" has binaries/g
+const yarnRegexp = /"((?:@[a-z][a-z0-9-_.]*\/)?[a-z][a-z0-9-_.]*)@(\d+\.\d+\.\d+(?:-[a-z0-9-]+(?:\.[a-z0-9-]+)*)?)"/g
 
 export default function checkGlobal(options: GlobalOption) {
   const { manager, ...openaiOptions } = options
@@ -18,11 +18,9 @@ export default function checkGlobal(options: GlobalOption) {
     }
     else if (manager === 'yarn') {
       const result = execCommand('yarn global list --depth=0')
-      const iterator = Array.from(result.matchAll(yarnRegexp), (m: string[]) => m[1])
+      const iterator = Array.from(result.matchAll(yarnRegexp), (m: string[]) => [m[1], m[2]])
       for (const dependency of iterator) {
-        const index = dependency.lastIndexOf('@')
-        const packageName = dependency.slice(0, index)
-        const version = dependency.slice(index + 1)
+        const [packageName, version] = dependency
         dependencies[packageName] = { version }
       }
     }
