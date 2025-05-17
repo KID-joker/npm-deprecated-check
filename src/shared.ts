@@ -6,7 +6,7 @@ const homedir = os.homedir()
 
 export const rcPath = path.resolve(homedir, '.ndcrc')
 
-export const getGlobalConfig = function () {
+export function getGlobalConfig() {
   try {
     return fs.readJSONSync(rcPath) || {}
   }
