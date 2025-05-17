@@ -49,7 +49,7 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
         const packageNames = Object.keys(packages)
         const result: Record<string, VersionOrRange> = {}
         for (const depPath in content.packages) {
-          const info = content.packages[depPath]
+          const info = (content.packages as Record<string, any>)[depPath]
           packageNames.includes(info.name as string) && (result[info.name as string] = { version: info.version })
         }
         return result
