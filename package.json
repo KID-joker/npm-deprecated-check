@@ -47,7 +47,6 @@
     "ansis": "^3.3.2",
     "commander": "^11.1.0",
     "fs-extra": "^11.2.0",
-    "node-fetch": "^3.3.2",
     "semver": "^7.6.3",
     "yocto-spinner": "^0.1.1"
   },

@@ -1,5 +1,4 @@
 import type { OpenaiOption } from './types'
-import fetch from 'node-fetch'
 import { getGlobalConfig, openaiBaseURL, openaiModels } from './shared'
 import { log, warn } from './utils/console'
 import { safeJSON } from './utils/object'
