@@ -1,7 +1,6 @@
 import type { CommonOption, PackageInfo, PackageVersions, VersionOrRange } from './types'
 import process from 'node:process'
 import ansis from 'ansis'
-import fetch from 'node-fetch'
 import semver from 'semver'
 import { recommendDependencies } from './chatgpt'
 import { getGlobalConfig } from './shared'

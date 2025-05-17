@@ -1,14 +1,15 @@
+import { readFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import fs from 'fs-extra'
 
 const homedir = os.homedir()
 
 export const rcPath = path.resolve(homedir, '.ndcrc')
 
-export const getGlobalConfig = function () {
+export function getGlobalConfig() {
   try {
-    return fs.readJSONSync(rcPath) || {}
+    const data = readFileSync(rcPath, 'utf-8')
+    return JSON.parse(data) || {}
   }
   catch {
     return {}
