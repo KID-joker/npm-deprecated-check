@@ -35,8 +35,8 @@
     "build": "pnpm build:releases && unbuild",
     "build:releases": "tsx ./scripts/node_releases.ts",
     "dev": "tsx ./src/cli.ts",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "test": "node --test",
     "typecheck": "tsc --noEmit"
   },
