@@ -5,6 +5,10 @@
 
 <p align="center"><img src="./assets/preview.png" /></p>
 
+## Requirements
+
+Since version 1.4.0, `npm-deprecated-check` requires Node.js 18 or higher.
+
 ## Install
 
 ```bash
