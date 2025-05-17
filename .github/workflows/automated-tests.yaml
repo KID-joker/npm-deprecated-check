@@ -23,19 +23,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+          run_install: false
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           cache-dependency-path: pnpm-lock.yaml
           node-version: ${{ matrix.node-version }}
           check-latest: true
-          cache: npm
+          cache: pnpm
 
       - name: Install dependencies
-        run: npx pnpm install
+        run: pnpm install
 
       - name: Build project
-        run: npx pnpm run build
+        run: pnpm run build
 
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
@@ -49,7 +55,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        node-version: [22, 20, 18, 16]
+        node-version: [22, 20, 18]
 
     steps:
       - name: Checkout code
@@ -68,17 +74,23 @@ jobs:
           path: dist
 
       - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+          run_install: false
+
+      - name: Check versions
         run: |
-          if [[ ${{ matrix.node-version }} == 16 ]]; then
-            npm install -g pnpm@8
-          else
-            npm install -g pnpm
-          fi
+          yarn --version
+          pnpm --version
 
-      - name: Pnpm version
-        run: pnpm --version
+      - name: Check global dependencies
+        run: |
+          npm ls -g --depth=0 --json
+          yarn global list --depth=0
+          pnpm list -g --depth=0 --json
 
-      - name: Install dependencies
+      - name: Install production dependencies
         run: pnpm install --prod
 
       - name: Run tests
