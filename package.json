@@ -46,13 +46,11 @@
     "@yarnpkg/parsers": "^3.0.3",
     "ansis": "^4.0.0",
     "commander": "^13.1.0",
-    "fs-extra": "^11.3.0",
     "semver": "^7.7.2",
     "yocto-spinner": "^0.2.2"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.13.1",
-    "@types/fs-extra": "^11.0.4",
     "@types/node": "^22.15.18",
     "@types/semver": "^7.7.0",
     "@types/yarnpkg__lockfile": "^1.1.9",

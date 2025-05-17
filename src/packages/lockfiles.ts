@@ -1,8 +1,8 @@
 import type { VersionOrRange } from '../types'
+import fs from 'node:fs'
 import { resolve } from 'node:path'
 import { readWantedLockfile } from '@pnpm/lockfile-file'
 import { parseSyml } from '@yarnpkg/parsers'
-import fs from 'fs-extra'
 
 const npmLockPath = resolve('./package-lock.json')
 const yarnLockPath = resolve('./yarn.lock')
@@ -12,7 +12,7 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
   const npmLock = {
     path: npmLockPath,
     read() {
-      const lockfileContent = fs.readJsonSync(this.path)
+      const lockfileContent = JSON.parse(fs.readFileSync(this.path, 'utf-8'))
       let dependencies = lockfileContent.dependencies
       let packageNamePrefix = ''
       if (lockfileContent.lockfileVersion > 1) {
