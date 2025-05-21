@@ -1,8 +1,8 @@
 import type { VersionOrRange } from '../types'
+import fs from 'node:fs'
 import { resolve } from 'node:path'
 import { readWantedLockfile } from '@pnpm/lockfile-file'
-import lockfile from '@yarnpkg/lockfile'
-import fs from 'fs-extra'
+import { parseSyml } from '@yarnpkg/parsers'
 
 const npmLockPath = resolve('./package-lock.json')
 const yarnLockPath = resolve('./yarn.lock')
@@ -12,7 +12,7 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
   const npmLock = {
     path: npmLockPath,
     read() {
-      const lockfileContent = fs.readJsonSync(this.path)
+      const lockfileContent = JSON.parse(fs.readFileSync(this.path, 'utf-8'))
       let dependencies = lockfileContent.dependencies
       let packageNamePrefix = ''
       if (lockfileContent.lockfileVersion > 1) {
@@ -32,11 +32,11 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
   const yarnLock = {
     path: yarnLockPath,
     read() {
-      const content = fs.readFileSync(this.path).toString('utf-8')
-      const json = lockfile.parse(content)
+      const content = fs.readFileSync(this.path, 'utf-8')
+      const json = parseSyml(content)
       const result: Record<string, VersionOrRange> = {}
       for (const packageName in packages)
-        json.object[`${packageName}@${packages[packageName].range}`] && (result[packageName] = { version: json.object[`${packageName}@${packages[packageName].range}`].version })
+        json[`${packageName}@${packages[packageName].range}`] && (result[packageName] = { version: json[`${packageName}@${packages[packageName].range}`].version })
 
       return result
     },
@@ -49,7 +49,7 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
         const packageNames = Object.keys(packages)
         const result: Record<string, VersionOrRange> = {}
         for (const depPath in content.packages) {
-          const info = content.packages[depPath]
+          const info = (content.packages as Record<string, any>)[depPath]
           packageNames.includes(info.name as string) && (result[info.name as string] = { version: info.version })
         }
         return result
