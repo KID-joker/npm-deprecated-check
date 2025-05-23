@@ -63,7 +63,15 @@ test('current tests', async (t) => {
 
       await check(manager, t)
     }),
-  ).finally(() => {
+  ).then(async () => {
+    await t.test(`deep inspection of deprecated dependencies`, (_t, done) => {
+      exec(`cd ${playgroundDir} && node ${cli} current --deep`, { timeout: 160000 }, (_error, _stdout, stderr) => {
+        // eslint-disable-next-line no-control-regex
+        assert.ok((stderr.match(/^\u001B\[33mdeprecated:/gm) || []).length === 6, 'Expected "WARN" to be mentioned six times in deprecation warning).')
+        done()
+      })
+    })
+  }).finally(() => {
     fs.rmSync(playgroundDir, { recursive: true, force: true })
   })
 })
