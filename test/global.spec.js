@@ -22,7 +22,7 @@ const uninstallCommands = {
 
 async function check(manager, t) {
   try {
-    execSync(`${installCommands[manager]} eslint --loglevel verbose`)
+    execSync(`${installCommands[manager]} eslint`)
 
     await t.test(`check ${manager} that no deprecation warning is shown`, (_t, done) => {
       exec(`node ${cli} global --manager ${manager}`, (_error, _stdout, stderr) => {

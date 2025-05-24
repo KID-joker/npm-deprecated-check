@@ -33,6 +33,7 @@ program
   .description('check the packages of the current project')
   .addOption(new Option('--ignore <value>', 'ignore specific packages'))
   .addOption(new Option('--failfast', 'exit the program if it has been deprecated'))
+  .addOption(new Option('--deep', 'deep inspection for monorepo projects'))
   .addOption(registryOption)
   .addOption(gptOption)
   .addOption(gptModelOption)
