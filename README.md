@@ -56,6 +56,7 @@ Options:
   --registry <value>        specify registry URL, default: https://registry.npmjs.org/
   --ignore <value>          ignore specific packages, example: request,tslint
   --failfast                exit the program if it has been deprecated
+  --deep                    deep inspection for monorepo projects
 ```
 
 For `global`:
