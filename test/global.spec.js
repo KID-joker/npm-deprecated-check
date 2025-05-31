@@ -50,7 +50,8 @@ async function check(manager, t) {
     await t.test(`check ${manager} that exit the program if the package is deprecated`, (_t, done) => {
       exec(`node ${cli} global --manager ${manager} --failfast`, { timeout: 160000 }, (error, _stdout, stderr) => {
         // eslint-disable-next-line no-control-regex
-        assert.ok(error.code === 1 && (stderr.match(/^\u001B\[33mdeprecated:/gm) || []).length === 1, 'Expected "WARN" to be mentioned once in deprecation warning, and process.exit(1).')
+        assert.strictEqual((stderr.match(/^\u001B\[33mdeprecated:/gm) || []).length, 1, 'Expected exactly one deprecation warning')
+        assert.strictEqual(error?.code, 1, 'Expected process to exit with code 1')
         done()
       })
     })
