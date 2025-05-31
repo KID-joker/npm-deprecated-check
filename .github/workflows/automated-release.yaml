@@ -20,7 +20,7 @@ jobs:
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.15.0
+          version: latest
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
