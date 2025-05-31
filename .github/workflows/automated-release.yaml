@@ -30,7 +30,7 @@ jobs:
         run: pnpm install
 
       - name: Build the project
-        run: pnpm run build
+        run: node --run build
 
       - name: Publish to npm
         run: pnpm publish -r
