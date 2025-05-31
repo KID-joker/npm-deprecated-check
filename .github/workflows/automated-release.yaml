@@ -20,7 +20,7 @@ jobs:
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.15.0
+          version: latest
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
@@ -30,13 +30,12 @@ jobs:
         run: pnpm install
 
       - name: Build the project
-        run: pnpm run build
+        run: node --run build
 
       - name: Publish to npm
-        run: pnpm publish -r --access public --publish-branch release
+        run: pnpm publish -r
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
 
       - name: Get version from package.json
         id: get_version
