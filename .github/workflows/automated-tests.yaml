@@ -41,7 +41,7 @@ jobs:
         run: pnpm install
 
       - name: Build project
-        run: pnpm run build
+        run: node --run build
 
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
@@ -94,4 +94,4 @@ jobs:
         run: pnpm install --prod
 
       - name: Run tests
-        run: pnpm test
+        run: node --run test
