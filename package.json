@@ -50,8 +50,8 @@
     "yocto-spinner": "^1.0.0"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^4.16.2",
-    "@types/node": "^24.0.13",
+    "@antfu/eslint-config": "^4.17.0",
+    "@types/node": "^24.0.14",
     "@types/semver": "^7.7.0",
     "@types/yarnpkg__lockfile": "^1.1.9",
     "eslint": "^9.31.0",
