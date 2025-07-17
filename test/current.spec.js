@@ -40,37 +40,40 @@ async function check(manager, t) {
 
   await t.test(`check ${manager} that exit the program if the package is deprecated`, (_t, done) => {
     exec(`cd ${deprecatedDir} && node ${cli} current --failfast`, { timeout: 160000 }, (error, _stdout, stderr) => {
+      assert.strictEqual(error.code, 1, 'Expected process to exit with code 1.')
       // eslint-disable-next-line no-control-regex
-      assert.ok(error.code === 1 && (stderr.match(/^\u001B\[33mdeprecated:/gm) || []).length === 1, 'Expected "WARN" to be mentioned once in deprecation warning, and process.exit(1).')
+      assert.strictEqual((stderr.match(/^\u001B\[33mdeprecated:/gm) || []).length, 1, 'Expected "WARN" to be mentioned once in deprecation warning.')
       done()
     })
   })
 }
 
 test('current tests', async (t) => {
-  for (const manager of managers) {
-    // Setup test directories
-    for (const caseName of cases) {
-      const caseDir = path.join(playgroundDir, manager, caseName)
-      fs.mkdirSync(caseDir, { recursive: true })
+  try {
+    for (const manager of managers) {
+      // Setup test directories
+      for (const caseName of cases) {
+        const caseDir = path.join(playgroundDir, manager, caseName)
+        fs.mkdirSync(caseDir, { recursive: true })
 
-      const srcFile = path.join(__dirname, 'examples', `${caseName}.json`)
-      const destFile = path.join(caseDir, 'package.json')
-      fs.copyFileSync(srcFile, destFile)
-      execSync(`${manager} install --quiet`, { cwd: caseDir })
-    }
+        const srcFile = path.join(__dirname, 'examples', `${caseName}.json`)
+        const destFile = path.join(caseDir, 'package.json')
+        fs.copyFileSync(srcFile, destFile)
+        execSync(`${manager} install --quiet`, { cwd: caseDir })
+      }
 
       await check(manager, t)
-    }),
-  ).then(async () => {
-    await t.test(`deep inspection of deprecated dependencies`, (_t, done) => {
+    }
+
+    await t.test(`deep inspection: checks for six deprecated dependencies`, (_t, done) => {
       exec(`cd ${playgroundDir} && node ${cli} current --deep`, { timeout: 160000 }, (_error, _stdout, stderr) => {
-        // eslint-disable-next-line no-control-regex
-        assert.ok((stderr.match(/^\u001B\[33mdeprecated:/gm) || []).length === 6, 'Expected "WARN" to be mentioned six times in deprecation warning).')
+      // eslint-disable-next-line no-control-regex
+        assert.ok((stderr.match(/^\x1B\[33mdeprecated:/gm) || []).length === 6, 'Expected "WARN" to be mentioned six times in deprecation warning).')
         done()
       })
     })
-  }).finally(() => {
+  }
+  finally {
     fs.rmSync(playgroundDir, { recursive: true, force: true })
-  })
+  }
 })
