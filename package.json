@@ -64,6 +64,11 @@
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"
   },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "publish-branch": "release"
+  },
   "lint-staged": {
     "*.{js,ts,md}": [
       "eslint --fix"
