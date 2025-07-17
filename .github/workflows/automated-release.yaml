@@ -33,10 +33,9 @@ jobs:
         run: pnpm run build
 
       - name: Publish to npm
-        run: pnpm publish -r --access public --publish-branch release
+        run: pnpm publish -r
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
 
       - name: Get version from package.json
         id: get_version
