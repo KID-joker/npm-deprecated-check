@@ -48,18 +48,17 @@ async function check(manager, t) {
 }
 
 test('current tests', async (t) => {
-  await Promise.all(
-    managers.map(async (manager) => {
-      cases.forEach((caseName) => {
-        const caseDir = path.join(playgroundDir, manager, caseName)
+  for (const manager of managers) {
+    // Setup test directories
+    for (const caseName of cases) {
+      const caseDir = path.join(playgroundDir, manager, caseName)
+      fs.mkdirSync(caseDir, { recursive: true })
 
-        fs.mkdirSync(caseDir, { recursive: true })
-
-        const srcFile = path.join(__dirname, 'examples', `${caseName}.json`)
-        const destFile = path.join(caseDir, 'package.json')
-        fs.copyFileSync(srcFile, destFile)
-        execSync(`${manager} install --quiet`, { cwd: caseDir })
-      })
+      const srcFile = path.join(__dirname, 'examples', `${caseName}.json`)
+      const destFile = path.join(caseDir, 'package.json')
+      fs.copyFileSync(srcFile, destFile)
+      execSync(`${manager} install --quiet`, { cwd: caseDir })
+    }
 
       await check(manager, t)
     }),
