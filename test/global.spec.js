@@ -13,7 +13,7 @@ const managers = ['npm', 'yarn', 'pnpm']
 const installCommands = {
   npm: 'npm i -g --force',
   yarn: 'yarn global add --force',
-  pnpm: 'pnpm i -g --force',
+  pnpm: 'pnpm add -g --force',
 }
 const uninstallCommands = {
   npm: 'npm un -g',
