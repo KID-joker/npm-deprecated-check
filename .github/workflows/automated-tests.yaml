@@ -94,4 +94,9 @@ jobs:
         run: pnpm install --prod
 
       - name: Run tests
+        if: matrix.node-version < 22
+        run: npm run test
+
+      - name: Run tests
+        if: matrix.node-version >= 22
         run: node --run test
