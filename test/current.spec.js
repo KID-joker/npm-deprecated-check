@@ -19,21 +19,21 @@ async function check(manager, t) {
 
   await t.test(`check ${manager} that no deprecation warning is shown`, (_t, done) => {
     exec(`cd ${normalDir} && node ${cli} current`, (_error, _stdout, stderr) => {
-      assert.ok(!/deprecated/.test(stderr), 'Not expected "deprecated" to be mentioned in deprecation warning.')
+      assert.doesNotMatch(stderr, /has not been deprecated/, 'Not expected "has not been deprecated" to be mentioned in deprecation warning.')
       done()
     })
   })
 
   await t.test(`check ${manager} that deprecation warning is shown if deprecated package is installed`, (_t, done) => {
     exec(`cd ${deprecatedDir} && node ${cli} current`, { timeout: 160000 }, (_error, _stdout, stderr) => {
-      assert.ok(/deprecated/.test(stderr), 'Expected "deprecated" to be mentioned in deprecation warning.')
+      assert.match(stderr, /has been deprecated/, 'Expected "has been deprecated" to be mentioned in deprecation warning.')
       done()
     })
   })
 
   await t.test(`check ${manager} that no deprecation warning is shown if ignore deprecated package`, (_t, done) => {
     exec(`cd ${deprecatedDir} && node ${cli} current --ignore request,tslint`, { timeout: 160000 }, (_error, _stdout, stderr) => {
-      assert.ok(!/deprecated/.test(stderr), 'Not expected "deprecated" to be mentioned in deprecation warning.')
+      assert.doesNotMatch(stderr, /has been deprecated/, 'Not expected "has been deprecated" to be mentioned in deprecation warning.')
       done()
     })
   })
