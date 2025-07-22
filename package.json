@@ -4,6 +4,9 @@
   "version": "1.7.0",
   "description": "Check for deprecated packages",
   "author": "KID-joker <kid_joker@126.com>",
+  "contributors": [
+    "Kristjan ESPERANTO (https://github.com/KristjanESPERANTO/)"
+  ],
   "license": "MIT",
   "homepage": "https://github.com/KID-joker/npm-deprecated-check#readme",
   "repository": {
