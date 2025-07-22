@@ -72,7 +72,6 @@ async function check(manager, t) {
 }
 
 test('global tests', async (t) => {
-  // Run tests
   for (const manager of managers) {
     await check(manager, t)
   }
