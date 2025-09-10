@@ -93,9 +93,12 @@ async function getPackageInfo(packageName: string, versionOrRange: VersionOrRang
 
   let minimumUpgradeVersion: string | null = null
   if (deprecated) {
-    for (const ver of Object.keys(packageRes.versions)) {
-      if (!packageRes.versions[ver].deprecated) {
-        minimumUpgradeVersion = ver
+    const versions = Object.keys(packageRes.versions);
+    for(let i = versions.indexOf(version); i >= 0; i--) {
+      const ver = versions[i];
+      if(!packageRes.versions[ver].deprecated) {
+        minimumUpgradeVersion = ver;
+        break;
       }
     }
   }
