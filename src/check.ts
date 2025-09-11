@@ -28,12 +28,13 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
       haveDeprecated = true
       warn(`${result.name}@${result.version}: ${result.time}\ndeprecated: ${result.deprecated}`)
 
+      log(result.minimumUpgradeVersion!)
       if(result.minimumUpgradeVersion){
         log(ansis.green('minimum upgrade version: '))
         log(`[${ansis.magenta(result.minimumUpgradeVersion)}](https://www.npmjs.com/package/${result.name}/v/${result.minimumUpgradeVersion})`)
       }
       else {
-        log(ansis.yellow('All available versions are deprecated. No upgrade available.'))
+        log(ansis.yellow('No upgrade available.'))
       }
       
       if (result.recommend) {
@@ -94,7 +95,7 @@ async function getPackageInfo(packageName: string, versionOrRange: VersionOrRang
   let minimumUpgradeVersion: string | null = null
   if (deprecated) {
     const versions = Object.keys(packageRes.versions);
-    for(let i = versions.indexOf(version); i >= 0; i--) {
+    for(let i = versions.indexOf(version); i < versions.length; i++) {
       const ver = versions[i];
       if(!packageRes.versions[ver].deprecated) {
         minimumUpgradeVersion = ver;
