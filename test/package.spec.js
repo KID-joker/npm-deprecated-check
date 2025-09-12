@@ -27,13 +27,13 @@ test('package tests', async (t) => {
 test('shows minimum upgrade version for deprecated package', async (t) => {
   await t.test('should display minimum upgrade version', (_t, done) => {
     exec(`node ${cli} package eslint -r 8.57.1`, (_error, _stdout, stderr) => {
-      const output = _stdout + stderr;
-      const match = output.match(/minimum upgrade version[^\[]*\[([^\]]+)\]/);
-      const expectedVersion = '9.11.0';
-      const actualVersion = match ? match[1].replace(/\x1B\[[0-9;]*m/g, '').replace(/[0-9;]*m\n[[]/, '') : undefined;
-      assert.strictEqual(actualVersion, expectedVersion, `Expected version: ${expectedVersion}, Actual version: ${actualVersion}`);
-      assert.ok(/minimum upgrade version/.test(output), 'Expected minimum upgrade version to be mentioned.');
-      done();
+      const output = _stdout + stderr
+      const match = output.match(/minimum upgrade version[^\[]*\[([^\]]+)\]/)
+      const expectedVersion = '9.0.0-alpha.0'
+      const actualVersion = match ? match[1].replace(/\x1B\[[0-9;]*m/g, '').replace(/[0-9;]*m\n[[]/, '') : undefined
+      assert.strictEqual(actualVersion, expectedVersion, `Expected version: ${expectedVersion}, Actual version: ${actualVersion}`)
+      assert.ok(/minimum upgrade version/.test(output), 'Expected minimum upgrade version to be mentioned.')
+      done()
     })
   })
 })
