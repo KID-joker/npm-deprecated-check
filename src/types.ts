@@ -38,6 +38,7 @@ export interface PackageInfo {
   deprecated?: string | undefined
   recommend?: Array<string> | string | null
   error?: string
+  minimumUpgradeVersion?: string | null
 }
 
 export interface PackageVersions {
