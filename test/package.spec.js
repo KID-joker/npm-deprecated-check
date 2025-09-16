@@ -28,9 +28,10 @@ test('shows minimum upgrade version for deprecated package', async (t) => {
   await t.test('should display minimum upgrade version', (_t, done) => {
     exec(`node ${cli} package eslint -r 8.57.1`, (_error, _stdout, stderr) => {
       const output = _stdout + stderr
-      const match = output.match(/minimum upgrade version[^\[]*\[([^\]]+)\]/)
+      const match = output.match(/minimum upgrade version[^[]*\[([^\]]+)\]/)
       const expectedVersion = '9.0.0-alpha.0'
-      const actualVersion = match ? match[1].replace(/\x1B\[[0-9;]*m/g, '').replace(/[0-9;]*m\n[[]/, '') : undefined
+      // eslint-disable-next-line no-control-regex
+      const actualVersion = match ? match[1].replace(/\x1B\[[0-9;]*m/g, '').replace(/[0-9;]*m\n\[/, '') : undefined
       assert.strictEqual(actualVersion, expectedVersion, `Expected version: ${expectedVersion}, Actual version: ${actualVersion}`)
       assert.ok(/minimum upgrade version/.test(output), 'Expected minimum upgrade version to be mentioned.')
       done()
@@ -41,8 +42,8 @@ test('shows minimum upgrade version for deprecated package', async (t) => {
 test('shows no-upgrade message when no upgrade available', async (t) => {
   await t.test('should display no-upgrade message', (_t, done) => {
     exec(`node ${cli} package vue-cli`, (_error, _stdout) => {
-      const output = _stdout;
-      assert.ok(/No upgrade available\./.test(output), 'Expected "No upgrade available." message to be mentioned.');
+      const output = _stdout
+      assert.ok(/No upgrade available\./.test(output), 'Expected "No upgrade available." message to be mentioned.')
       done()
     })
   })
