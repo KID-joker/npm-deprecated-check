@@ -3,6 +3,7 @@ import { exec } from 'node:child_process'
 import path from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { coerce, satisfies } from 'semver'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -47,4 +48,25 @@ test('shows no-upgrade message when no upgrade available', async (t) => {
       done()
     })
   })
+})
+
+test('engine requirements for Node versions', async (t) => {
+  const currentNode = coerce(process.version)
+  const requiredNode = '^18.18.0 || ^20.9.0 || >=21.1.0'
+  if (satisfies(currentNode, requiredNode)) {
+    await t.test('check that the current environment meets the Node.js version range required for eslint', (_t, done) => {
+      exec(`node ${cli} package eslint -r 9.35.0`, (_error, _stdout, stderr) => {
+        assert.ok(!/required node/.test(stderr), 'Not expected "required node" to be mentioned in deprecation warning.')
+        done()
+      })
+    })
+  }
+  else {
+    await t.test('check that the current environment doesn\'t meets the Node.js version range required for eslint', (_t, done) => {
+      exec(`node ${cli} package eslint -r 9.35.0`, (_error, _stdout, stderr) => {
+        assert.ok(/required node/.test(stderr), 'Expected "required node" to be mentioned in deprecation warning.')
+        done()
+      })
+    })
+  }
 })

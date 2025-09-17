@@ -22,6 +22,7 @@ npm install -g npm-deprecated-check
 - Recommend alternative packages through OpenAI.
 - Additionally checks if the running node version reached End Of Life.
 - Return the minimum upgradable version.
+- Check if the current environment meets the Node.js version range required for dependency operation.
 
 ## Usage
 
