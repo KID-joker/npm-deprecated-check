@@ -39,6 +39,7 @@ export interface PackageInfo {
   recommend?: Array<string> | string | null
   error?: string
   minimumUpgradeVersion?: string | null
+  requiredNode?: string
 }
 
 export interface PackageVersions {
@@ -50,6 +51,9 @@ export interface PackageVersions {
       name: string
       version: string
       deprecated?: string
+      engines?: {
+        node?: string
+      }
     }
   }
 }
