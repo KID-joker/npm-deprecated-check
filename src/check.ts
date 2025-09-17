@@ -28,21 +28,21 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
       haveDeprecated = true
       warn(`${result.name}@${result.version}: ${result.time}`)
       if (result.deprecated)
-        log(`${ansis.yellowBright('deprecated: ')}${result.deprecated}`)
+        log(`${ansis.yellowBright('Deprecated: ')}${result.deprecated}`)
       if (result.requiredNode)
-        log(`${ansis.magentaBright(ansis.bold('required node: '))}${result.requiredNode}`)
+        log(`${ansis.magentaBright('Required node: ')}${result.requiredNode}`)
 
       if (result.deprecated) {
         if (result.minimumUpgradeVersion) {
-          log(ansis.greenBright('minimum upgrade version: '))
+          log(ansis.greenBright('Minimum upgrade version: '))
           log(`[${ansis.magenta(result.minimumUpgradeVersion)}](https://www.npmjs.com/package/${result.name}/v/${result.minimumUpgradeVersion})`)
         }
         else {
-          log(ansis.yellowBright('No upgrade available.'))
+          log(ansis.yellowBright(`Since v${result.version}, there are no upgradable versions.`))
         }
       }
       if (result.recommend) {
-        log(ansis.greenBright('recommended: '))
+        log(ansis.greenBright('Recommended: '))
         if (Array.isArray(result.recommend)) {
           for (const packageName of result.recommend)
             log(`[${ansis.magenta(packageName)}](https://www.npmjs.com/package/${packageName})`)
