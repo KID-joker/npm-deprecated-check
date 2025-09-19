@@ -1,3 +1,4 @@
+/* eslint-disable no-control-regex */
 import assert from 'node:assert/strict'
 import { exec, execSync } from 'node:child_process'
 import path from 'node:path'
@@ -25,8 +26,8 @@ async function check(manager, t) {
     execSync(`${installCommands[manager]} eslint`)
 
     await t.test(`check ${manager} that no deprecation warning is shown`, (_t, done) => {
-      exec(`node ${cli} global --manager ${manager}`, (_error, _stdout, stderr) => {
-        assert.ok(!/deprecated/.test(stderr), 'Not expected "deprecated" to be mentioned in deprecation warning.')
+      exec(`node ${cli} global --manager ${manager}`, (_error, stdout, _stderr) => {
+        assert.ok(!stdout.match(/^\u001B\[93mDeprecated:/gim), 'Not expected "Deprecated" to be mentioned in deprecation warning.')
         done()
       })
     })
@@ -34,23 +35,22 @@ async function check(manager, t) {
     execSync(`${installCommands[manager]} tslint vue-cli`)
 
     await t.test(`check ${manager} that deprecation warning is shown if deprecated package is installed`, (_t, done) => {
-      exec(`node ${cli} global --manager ${manager}`, { timeout: 160000 }, (_error, _stdout, stderr) => {
-        assert.ok(/deprecated/.test(stderr), 'Expected "deprecated" to be mentioned in deprecation warning.')
+      exec(`node ${cli} global --manager ${manager}`, { timeout: 160000 }, (_error, stdout, _stderr) => {
+        assert.ok(stdout.match(/^\u001B\[93mDeprecated:/gim), 'Expected "Deprecated" to be mentioned in deprecation warning.')
         done()
       })
     })
 
     await t.test(`check ${manager} that no deprecation warning is shown if ignore deprecated package`, (_t, done) => {
-      exec(`node ${cli} global --manager ${manager} --ignore tslint,vue-cli`, { timeout: 160000 }, (_error, _stdout, stderr) => {
-        assert.ok(!/deprecated/.test(stderr), 'Not expected "deprecated" to be mentioned in deprecation warning.')
+      exec(`node ${cli} global --manager ${manager} --ignore tslint,vue-cli`, { timeout: 160000 }, (_error, stdout, _stderr) => {
+        assert.ok(!stdout.match(/^\u001B\[93mDeprecated:/gim), 'Not expected "Deprecated" to be mentioned in deprecation warning.')
         done()
       })
     })
 
     await t.test(`check ${manager} that exit the program if the package is deprecated`, (_t, done) => {
-      exec(`node ${cli} global --manager ${manager} --failfast`, { timeout: 160000 }, (error, _stdout, stderr) => {
-        // eslint-disable-next-line no-control-regex
-        assert.ok(error.code === 1 && (stderr.match(/^\u001B\[33mdeprecated:/gm) || []).length === 1, 'Expected "WARN" to be mentioned once in deprecation warning, and process.exit(1).')
+      exec(`node ${cli} global --manager ${manager} --failfast`, { timeout: 160000 }, (error, stdout, _stderr) => {
+        assert.ok(error.code === 1 && (stdout.match(/^\u001B\[93mDeprecated:/gim) || []).length === 1, 'Expected "Deprecated" to be mentioned once in deprecation warning, and process.exit(1).')
         done()
       })
     })

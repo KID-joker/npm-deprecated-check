@@ -1,7 +1,7 @@
 import type { CommonOption, PackageInfo, PackageVersions, VersionOrRange } from './types'
 import process from 'node:process'
 import ansis from 'ansis'
-import semver from 'semver'
+import { coerce, maxSatisfying, satisfies, sort } from 'semver'
 import { recommendDependencies } from './chatgpt'
 import { getGlobalConfig } from './shared'
 import { error, log, ok, warn } from './utils/console'
@@ -24,19 +24,25 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
       log()
     }
 
-    if (result.deprecated) {
+    if (result.deprecated || result.requiredNode) {
       haveDeprecated = true
-      warn(`${result.name}@${result.version}: ${result.time}\ndeprecated: ${result.deprecated}`)
+      warn(`${result.name}@${result.version}: ${result.time}`)
+      if (result.deprecated)
+        log(`${ansis.yellowBright('Deprecated: ')}${result.deprecated}`)
+      if (result.requiredNode)
+        log(`${ansis.magentaBright('Required node: ')}${result.requiredNode}`)
 
-      if (result.minimumUpgradeVersion) {
-        log(ansis.green('minimum upgrade version: '))
-        log(`[${ansis.magenta(result.minimumUpgradeVersion)}](https://www.npmjs.com/package/${result.name}/v/${result.minimumUpgradeVersion})`)
-      }
-      else {
-        log(ansis.yellow('No upgrade available.'))
+      if (result.deprecated) {
+        if (result.minimumUpgradeVersion) {
+          log(ansis.greenBright('Minimum upgrade version: '))
+          log(`[${ansis.magenta(result.minimumUpgradeVersion)}](https://www.npmjs.com/package/${result.name}/v/${result.minimumUpgradeVersion})`)
+        }
+        else {
+          log(ansis.yellowBright(`Since v${result.version}, there are no upgradable versions.`))
+        }
       }
       if (result.recommend) {
-        log(ansis.green('recommended: '))
+        log(ansis.greenBright('Recommended: '))
         if (Array.isArray(result.recommend)) {
           for (const packageName of result.recommend)
             log(`[${ansis.magenta(packageName)}](https://www.npmjs.com/package/${packageName})`)
@@ -60,6 +66,7 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
 }
 
 const globalConfig = getGlobalConfig()
+const currentNode = coerce(process.version)!
 async function getPackageInfo(packageName: string, versionOrRange: VersionOrRange, config: CommonOption) {
   let packageRes
   try {
@@ -79,7 +86,7 @@ async function getPackageInfo(packageName: string, versionOrRange: VersionOrRang
     return { name: packageName, error: `${packageName}: Could not find the package!` }
 
   const version: string | null = versionOrRange.version || (versionOrRange.range
-    ? packageRes['dist-tags'][versionOrRange.range] || semver.maxSatisfying(Object.keys(packageRes.versions), versionOrRange.range || '*') || null
+    ? packageRes['dist-tags'][versionOrRange.range] || maxSatisfying(Object.keys(packageRes.versions), versionOrRange.range || '*') || null
     : packageRes['dist-tags'].latest
       ? packageRes['dist-tags'].latest
       : error(`${packageName}: 'latest' dist-tag does not exist!`) as unknown as string)
@@ -92,13 +99,20 @@ async function getPackageInfo(packageName: string, versionOrRange: VersionOrRang
 
   let minimumUpgradeVersion: string | null = null
   if (deprecated) {
-    const versions = semver.sort(Object.keys(packageRes.versions))
+    const versions = sort(Object.keys(packageRes.versions))
     for (let i = versions.indexOf(version); i < versions.length; i++) {
       const ver = versions[i]
       if (!packageRes.versions[ver].deprecated) {
         minimumUpgradeVersion = ver
         break
       }
+    }
+  }
+
+  let requiredNode = packageRes.versions[version]?.engines?.node
+  if (requiredNode) {
+    if (satisfies(currentNode, requiredNode)) {
+      requiredNode = undefined
     }
   }
 
@@ -109,6 +123,7 @@ async function getPackageInfo(packageName: string, versionOrRange: VersionOrRang
     deprecated,
     recommend,
     minimumUpgradeVersion,
+    requiredNode,
   }
 
   return packageInfo
