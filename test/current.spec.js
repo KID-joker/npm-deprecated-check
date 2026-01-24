@@ -1,5 +1,4 @@
 /* eslint-disable no-control-regex */
-/* eslint-disable no-control-regex */
 import assert from 'node:assert/strict'
 import { exec, execSync } from 'node:child_process'
 import fs from 'node:fs'
@@ -20,31 +19,31 @@ async function check(manager, t) {
   const deprecatedDir = path.join(playgroundDir, manager, 'deprecated')
 
   await t.test(`check ${manager} that no deprecation warning is shown`, (_t, done) => {
-    exec(`cd ${normalDir} && node ${cli} current`, (_error, _stdout, stderr) => {
-      assert.doesNotMatch(stderr, /has not been deprecated/, 'Not expected "has not been deprecated" to be mentioned in deprecation warning.')
+    exec(`cd ${normalDir} && node ${cli} current`, (_error, stdout, _stderr) => {
+      assert.doesNotMatch(stdout, /has not been deprecated/, 'Not expected "has not been deprecated" to be mentioned in deprecation warning.')
       done()
     })
   })
 
   await t.test(`check ${manager} that deprecation warning is shown if deprecated package is installed`, (_t, done) => {
-    exec(`cd ${deprecatedDir} && node ${cli} current`, { timeout: 160000 }, (_error, _stdout, stderr) => {
-      assert.match(stderr, /has been deprecated/, 'Expected "has been deprecated" to be mentioned in deprecation warning.')
+    exec(`cd ${deprecatedDir} && node ${cli} current`, { timeout: 160000 }, (_error, stdout, _stderr) => {
+      assert.match(stdout, /has been deprecated/, 'Expected "has been deprecated" to be mentioned in deprecation warning.')
       done()
     })
   })
 
   await t.test(`check ${manager} that no deprecation warning is shown if ignore deprecated package`, (_t, done) => {
-    exec(`cd ${deprecatedDir} && node ${cli} current --ignore request,tslint`, { timeout: 160000 }, (_error, _stdout, stderr) => {
-      assert.doesNotMatch(stderr, /has been deprecated/, 'Not expected "has been deprecated" to be mentioned in deprecation warning.')
+    exec(`cd ${deprecatedDir} && node ${cli} current --ignore request,tslint`, { timeout: 160000 }, (_error, stdout, _stderr) => {
+      assert.doesNotMatch(stdout, /has been deprecated/, 'Not expected "has been deprecated" to be mentioned in deprecation warning.')
       done()
     })
   })
 
   await t.test(`check ${manager} that exit the program if the package is deprecated`, (_t, done) => {
-    exec(`cd ${deprecatedDir} && node ${cli} current --failfast`, { timeout: 160000 }, (error, _stdout, stderr) => {
+    exec(`cd ${deprecatedDir} && node ${cli} current --failfast`, { timeout: 160000 }, (error, stdout, _stderr) => {
       assert.strictEqual(error.code, 1, 'Expected process to exit with code 1.')
-      // eslint-disable-next-line no-control-regex
-      assert.strictEqual((stderr.match(/^\u001B\[33mdeprecated:/gm) || []).length, 1, 'Expected "WARN" to be mentioned once in deprecation warning.')
+
+      assert.strictEqual((stdout.match(/^\u001B\[93mDeprecated:/gm) || []).length, 1, 'Expected "WARN" to be mentioned once in deprecation warning.')
       done()
     })
   })
@@ -68,9 +67,8 @@ test('current tests', async (t) => {
     }
 
     await t.test(`deep inspection: checks for six deprecated dependencies`, (_t, done) => {
-      exec(`cd ${playgroundDir} && node ${cli} current --deep`, { timeout: 160000 }, (_error, _stdout, stderr) => {
-      // eslint-disable-next-line no-control-regex
-        assert.ok((stderr.match(/^\x1B\[33mdeprecated:/gm) || []).length === 6, 'Expected "WARN" to be mentioned six times in deprecation warning).')
+      exec(`cd ${playgroundDir} && node ${cli} current --deep`, { timeout: 160000 }, (_error, stdout, _stderr) => {
+        assert.ok((stdout.match(/^\x1B\[93mDeprecated:/gm) || []).length === 6, 'Expected "WARN" to be mentioned six times in deprecation warning).')
         done()
       })
     })

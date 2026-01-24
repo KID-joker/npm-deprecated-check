@@ -21,16 +21,21 @@ const uninstallCommands = {
   pnpm: 'pnpm remove -g',
 }
 
-// eslint-disable-next-line no-control-regex
-const deprecatedRegex = /^\u001B\[33mdeprecated:/gm
+const deprecatedRegex = /^\u001B\[93mDeprecated:/gm
 
 async function check(manager, t) {
   try {
+    // Cleanup before tests to ensure clean state
+    try {
+      execSync(`${uninstallCommands[manager]} eslint tslint vue-cli`, { stdio: 'ignore' })
+    }
+    catch {}
+
     execSync(`${installCommands[manager]} eslint`)
 
     await t.test(`check ${manager} that no deprecation warning is shown`, (_t, done) => {
-      exec(`node ${cli} global --manager ${manager}`, (_error, _stdout, stderr) => {
-        assert.doesNotMatch(stderr, deprecatedRegex, 'Not expected "deprecated" to be mentioned in deprecation warning.')
+      exec(`node ${cli} global --manager ${manager}`, (_error, stdout, _stderr) => {
+        assert.doesNotMatch(stdout, deprecatedRegex, 'Not expected "deprecated" to be mentioned in deprecation warning.')
         done()
       })
     })
@@ -38,22 +43,22 @@ async function check(manager, t) {
     execSync(`${installCommands[manager]} tslint vue-cli`)
 
     await t.test(`check ${manager} that deprecation warning is shown if deprecated package is installed`, (_t, done) => {
-      exec(`node ${cli} global --manager ${manager}`, { timeout: 160000 }, (_error, _stdout, stderr) => {
-        assert.match(stderr, deprecatedRegex, 'Expected "deprecated" to be mentioned in deprecation warning.')
+      exec(`node ${cli} global --manager ${manager}`, { timeout: 160000 }, (_error, stdout, _stderr) => {
+        assert.match(stdout, deprecatedRegex, 'Expected "deprecated" to be mentioned in deprecation warning.')
         done()
       })
     })
 
     await t.test(`check ${manager} that no deprecation warning is shown if ignore deprecated package`, (_t, done) => {
-      exec(`node ${cli} global --manager ${manager} --ignore request,tslint,vue-cli`, { timeout: 160000 }, (_error, _stdout, stderr) => {
-        assert.doesNotMatch(stderr, deprecatedRegex, 'Not expected "deprecated" to be mentioned in deprecation warning.')
+      exec(`node ${cli} global --manager ${manager} --ignore request,tslint,vue-cli`, { timeout: 160000 }, (_error, stdout, _stderr) => {
+        assert.doesNotMatch(stdout, deprecatedRegex, 'Not expected "deprecated" to be mentioned in deprecation warning.')
         done()
       })
     })
 
     await t.test(`check ${manager} that exit the program if the package is deprecated`, (_t, done) => {
-      exec(`node ${cli} global --manager ${manager} --failfast`, { timeout: 160000 }, (error, _stdout, stderr) => {
-        const deprecatedMatches = (stderr.match(deprecatedRegex) || []).length
+      exec(`node ${cli} global --manager ${manager} --failfast`, { timeout: 160000 }, (error, stdout, _stderr) => {
+        const deprecatedMatches = (stdout.match(deprecatedRegex) || []).length
         assert.strictEqual(deprecatedMatches, 1, 'Expected exactly one deprecation warning')
         assert.strictEqual(error?.code, 1, 'Expected process to exit with code 1')
 

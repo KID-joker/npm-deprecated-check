@@ -10,17 +10,19 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const cli = path.resolve(__dirname, '../dist/cli.mjs')
 
+const deprecatedRegex = /^\u001B\[93mDeprecated:/gm
+
 test('package tests', async (t) => {
   await t.test('check that a deprecated package is detected', (_t, done) => {
     exec(`node ${cli} package request`, (_error, stdout, _stderr) => {
-      assert.ok(stdout.match(/^\u001B\[93mDeprecated:/gim), 'Expected "Deprecated" to be mentioned in deprecation warning.')
+      assert.match(stdout, deprecatedRegex, 'Expected "deprecated" to be mentioned in deprecation warning.')
       done()
     })
   })
 
   await t.test('check that a non-deprecated package is not detected as deprecated', (_t, done) => {
     exec(`node ${cli} package eslint`, (_error, stdout, _stderr) => {
-      assert.ok(!stdout.match(/^\u001B\[93mDeprecated:/gim), 'Not expected "Deprecated" to be mentioned in deprecation warning.')
+      assert.doesNotMatch(stdout, deprecatedRegex, 'Not expected "deprecated" to be mentioned in deprecation warning.')
       done()
     })
   })
@@ -41,7 +43,7 @@ test('shows minimum upgrade version for deprecated package', async (t) => {
 
 test('shows no-upgrade message when no upgrade available', async (t) => {
   await t.test('should display no-upgrade message', (_t, done) => {
-    exec(`node ${cli} package vue-cli`, (_error, stdout) => {
+    exec(`node ${cli} package vue-cli`, (_error, stdout, _stderr) => {
       assert.ok(/no upgradable versions\./.test(stdout), 'Expected "no upgradable versions" message to be mentioned.')
       done()
     })
