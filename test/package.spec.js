@@ -10,19 +10,20 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const cli = path.resolve(__dirname, '../dist/cli.mjs')
 
+// Regex to match ANSI-formatted deprecation warnings (yellowBright = \u001B[93m)
 const deprecatedRegex = /^\u001B\[93mDeprecated:/gm
 
 test('package tests', async (t) => {
   await t.test('check that a deprecated package is detected', (_t, done) => {
     exec(`node ${cli} package request`, (_error, stdout, _stderr) => {
-      assert.match(stdout, deprecatedRegex, 'Expected "deprecated" to be mentioned in deprecation warning.')
+      assert.match(stdout, deprecatedRegex, 'Expected "Deprecated" to be mentioned in output.')
       done()
     })
   })
 
   await t.test('check that a non-deprecated package is not detected as deprecated', (_t, done) => {
     exec(`node ${cli} package eslint`, (_error, stdout, _stderr) => {
-      assert.doesNotMatch(stdout, deprecatedRegex, 'Not expected "deprecated" to be mentioned in deprecation warning.')
+      assert.doesNotMatch(stdout, deprecatedRegex, 'Not expected "Deprecated" to be mentioned in output.')
       done()
     })
   })

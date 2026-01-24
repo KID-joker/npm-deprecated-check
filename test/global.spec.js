@@ -21,6 +21,7 @@ const uninstallCommands = {
   pnpm: 'pnpm remove -g',
 }
 
+// Regex to match ANSI-formatted deprecation warnings (yellowBright = \u001B[93m)
 const deprecatedRegex = /^\u001B\[93mDeprecated:/gm
 
 async function check(manager, t) {
@@ -35,7 +36,7 @@ async function check(manager, t) {
 
     await t.test(`check ${manager} that no deprecation warning is shown`, (_t, done) => {
       exec(`node ${cli} global --manager ${manager}`, (_error, stdout, _stderr) => {
-        assert.doesNotMatch(stdout, deprecatedRegex, 'Not expected "deprecated" to be mentioned in deprecation warning.')
+        assert.doesNotMatch(stdout, deprecatedRegex, 'Not expected "Deprecated" to be mentioned in output.')
         done()
       })
     })
@@ -44,14 +45,15 @@ async function check(manager, t) {
 
     await t.test(`check ${manager} that deprecation warning is shown if deprecated package is installed`, (_t, done) => {
       exec(`node ${cli} global --manager ${manager}`, { timeout: 160000 }, (_error, stdout, _stderr) => {
-        assert.match(stdout, deprecatedRegex, 'Expected "deprecated" to be mentioned in deprecation warning.')
+        assert.match(stdout, deprecatedRegex, 'Expected "Deprecated" to be mentioned in output.')
         done()
       })
     })
 
+    // Note: request is included in ignore list as it may be a transitive dependency of vue-cli
     await t.test(`check ${manager} that no deprecation warning is shown if ignore deprecated package`, (_t, done) => {
       exec(`node ${cli} global --manager ${manager} --ignore request,tslint,vue-cli`, { timeout: 160000 }, (_error, stdout, _stderr) => {
-        assert.doesNotMatch(stdout, deprecatedRegex, 'Not expected "deprecated" to be mentioned in deprecation warning.')
+        assert.doesNotMatch(stdout, deprecatedRegex, 'Not expected "Deprecated" to be mentioned when packages are ignored.')
         done()
       })
     })
