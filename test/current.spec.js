@@ -75,6 +75,15 @@ test('current tests', async (t) => {
         done()
       })
     })
+
+    await t.test(`shows minimum Node version summary for current project`, (_t, done) => {
+      const normalDir = path.join(playgroundDir, 'npm', 'normal')
+      exec(`cd ${normalDir} && node ${cli} current`, (_error, stdout, _stderr) => {
+        assert.ok(/📊 Node Version Summary:/.test(stdout), 'Expected "Node Version Summary" to be shown.')
+        assert.ok(/Minimum Node version (?:required|\(production\)|\(development\)):/.test(stdout), 'Expected minimum Node version message.')
+        done()
+      })
+    })
   }
   finally {
     fs.rmSync(playgroundDir, { recursive: true, force: true })

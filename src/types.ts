@@ -40,6 +40,9 @@ export interface PackageInfo {
   error?: string
   minimumUpgradeVersion?: string | null
   requiredNode?: string
+  compatibleVersion?: string | null
+  nodeRequirement?: string
+  dependencyType?: 'production' | 'development'
 }
 
 export interface PackageVersions {

@@ -23,6 +23,68 @@ npm install -g npm-deprecated-check
 - Additionally checks if the running node version reached End Of Life.
 - Return the minimum upgradable version.
 - Check if the current environment meets the Node.js version range required for dependency operation.
+- Calculate the minimum Node.js version required across all dependencies.
+- Suggest compatible dependency versions when Node.js version requirements are not met.
+
+## Node.js Version Compatibility
+
+The tool automatically analyzes Node.js version requirements across all dependencies and provides helpful information:
+
+### Version Summary
+
+After checking dependencies, you'll see a summary of Node.js version requirements:
+
+```
+📊 Node Version Summary:
+Minimum Node version (production): 18.18.0
+Minimum Node version (development): 20.17.0
+Current Node version: v25.4.0
+```
+
+If production and development requirements are the same:
+
+```
+📊 Node Version Summary:
+Minimum Node version required: 18.18.0 (same for production and development)
+Current Node version: v25.4.0
+```
+
+This helps you understand:
+- The minimum Node.js version needed for production deployments
+- Whether development tools require a higher Node.js version
+- If you can deploy with an older Node.js version while developing with a newer one
+
+### Compatible Version Suggestions
+
+When a dependency requires a newer Node.js version than you're currently running, the tool suggests a compatible alternative version:
+
+```
+ WARN  eslint@9.35.0: 2024-10-05T18:45:12.345Z
+Required node: ^18.18.0 || ^20.9.0 || >=21.1.0
+Compatible version for current Node: 8.57.1
+```
+
+This allows you to either upgrade your Node.js version or downgrade the dependency to a compatible version.
+
+### Engines Validation
+
+When checking a project with `ndc current`, the tool compares your `package.json` `engines.node` field against the actual requirements of your dependencies:
+
+```
+📊 Node Version Summary:
+Minimum Node version (production): 20.0.0
+Minimum Node version (development): 20.17.0
+Current Node version: v25.4.0
+Project engines.node: >=18.12
+
+⚠️  Production dependencies require Node >=20.0.0, but package.json allows >=18.12
+   Consider updating engines.node to ">=20.0.0"
+```
+
+This helps you:
+- Keep `engines.node` in sync with actual dependency requirements
+- Prevent CI/CD failures due to incorrect Node version specifications
+- Ensure contributors use compatible Node versions
 
 ## Usage
 
