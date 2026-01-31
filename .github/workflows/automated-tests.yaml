@@ -41,7 +41,7 @@ jobs:
         run: pnpm install
 
       - name: Build project
-        run: pnpm run build
+        run: node --run build
 
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
@@ -93,5 +93,11 @@ jobs:
       - name: Install production dependencies
         run: pnpm install --prod
 
-      - name: Run tests
-        run: pnpm test
+      # node --run requires Node.js >= 22
+      - name: Run tests (Node < 22)
+        if: ${{ matrix.node-version < 22 }}
+        run: npm run test
+
+      - name: Run tests (Node >= 22)
+        if: ${{ matrix.node-version >= 22 }}
+        run: node --run test
