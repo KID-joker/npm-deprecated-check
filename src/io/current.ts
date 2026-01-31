@@ -12,7 +12,10 @@ export default async function checkCurrent(options: CurrentOption) {
   const currentPath = process.cwd()
   const pkgPaths = options.deep ? findPackageJsonDirs(currentPath) : [currentPath]
   for (const pkgPath of pkgPaths) {
-    log(`> ${pkgPath}`)
+    // Only show path for deep inspection (monorepos)
+    if (options.deep) {
+      log(`> ${pkgPath}`)
+    }
     await checkCurrentPackageJson(pkgPath, options)
     log()
   }
