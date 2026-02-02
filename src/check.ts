@@ -12,7 +12,7 @@ import { startSpinner, stopSpinner } from './utils/spinner'
 const globalConfig = getGlobalConfig()
 const currentNode = coerce(process.version)!
 
-export async function checkDependencies(dependencies: Record<string, VersionOrRange>, config: CommonOption, dependencyTypes?: Record<string, 'production' | 'development'>, projectEnginesNode?: string) {
+export async function checkDependencies(dependencies: Record<string, VersionOrRange>, config: CommonOption, dependencyTypes?: Record<string, 'production' | 'development'>, projectEnginesNode?: string, verbose?: boolean) {
   const packageList = Object.keys(dependencies)
   const resultList = []
   let haveDeprecated = false
@@ -77,38 +77,61 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
   const minRequiredNode = calculateMinimumNodeVersion(resultList)
   if (minRequiredNode.production || minRequiredNode.development) {
     log()
-    log(ansis.cyanBright('📊 Node Version Summary:'))
 
-    if (minRequiredNode.production === minRequiredNode.development) {
-      log(`Minimum Node version required: ${ansis.magenta(minRequiredNode.production || minRequiredNode.development)} (same for production and development)`)
+    // Default: Show minimal summary with recommendation
+    const productionMin = minRequiredNode.production || minRequiredNode.development
+
+    if (!verbose) {
+      // Minimal output: just the recommendation
+      if (productionMin) {
+        log(ansis.cyanBright('📊 Node Version Summary:'))
+        log(`Minimum engines.node: ${ansis.magenta(`>=${productionMin}`)}`)
+
+        // Show project's engines.node and validation if provided
+        if (projectEnginesNode) {
+          const projectMinVersion = minVersion(projectEnginesNode)
+          const requiredMinVersion = coerce(productionMin)
+
+          if (projectMinVersion && requiredMinVersion && projectMinVersion.compare(requiredMinVersion) < 0) {
+            log()
+            warn(`Recommendation: Update package.json engines.node to ">=${productionMin}"`)
+            log(`  Current: ${ansis.cyan(projectEnginesNode)}`)
+          }
+        }
+      }
     }
     else {
-      if (minRequiredNode.production) {
-        log(`Minimum Node version (production): ${ansis.magenta(minRequiredNode.production)}`)
+      // Verbose: Show detailed breakdown
+      log(ansis.cyanBright('📊 Node Version Summary (detailed):'))
+
+      if (minRequiredNode.production === minRequiredNode.development) {
+        log(`Minimum Node version required: ${ansis.magenta(minRequiredNode.production || minRequiredNode.development)} (same for production and development)`)
       }
-      if (minRequiredNode.development) {
-        log(`Minimum Node version (development): ${ansis.magenta(minRequiredNode.development)}`)
+      else {
+        if (minRequiredNode.production) {
+          log(`Minimum Node version (production): ${ansis.magenta(minRequiredNode.production)}`)
+        }
+        if (minRequiredNode.development) {
+          log(`Minimum Node version (development): ${ansis.magenta(minRequiredNode.development)}`)
+        }
       }
-    }
 
-    log(`Current Node version: ${ansis.magenta(process.version)}`)
+      log(`Current Node version: ${ansis.magenta(process.version)}`)
 
-    // Show project's engines.node if provided
-    if (projectEnginesNode) {
-      log(`Project engines.node: ${ansis.cyan(projectEnginesNode)}`)
+      // Show project's engines.node if provided
+      if (projectEnginesNode) {
+        log(`Project engines.node: ${ansis.cyan(projectEnginesNode)}`)
 
-      // Validate engines.node against actual requirements
-      const productionMin = minRequiredNode.production
-      if (productionMin) {
-        // Check if the project's engines.node range is compatible with the minimum requirement
-        // We need to check if engines.node could allow versions below productionMin
-        const projectMinVersion = minVersion(projectEnginesNode)
-        const requiredMinVersion = coerce(productionMin)
+        // Validate engines.node against actual requirements
+        if (productionMin) {
+          const projectMinVersion = minVersion(projectEnginesNode)
+          const requiredMinVersion = coerce(productionMin)
 
-        if (projectMinVersion && requiredMinVersion && projectMinVersion.compare(requiredMinVersion) < 0) {
-          log()
-          warn(`Production dependencies require Node >=${productionMin}, but package.json allows ${projectEnginesNode}`)
-          log(`  ${ansis.yellowBright(`Consider updating engines.node to ">=${productionMin}"`)}`)
+          if (projectMinVersion && requiredMinVersion && projectMinVersion.compare(requiredMinVersion) < 0) {
+            log()
+            warn(`Production dependencies require Node >=${productionMin}, but package.json allows ${projectEnginesNode}`)
+            log(`  ${ansis.yellowBright(`Consider updating engines.node to ">=${productionMin}"`)}`)
+          }
         }
       }
     }

@@ -76,8 +76,7 @@ test('minimum Node version summary', async (t) => {
   await t.test('should display minimum Node version required by all dependencies', (_t, done) => {
     exec(`node ${cli} package eslint -r 9.35.0`, (_error, stdout, _stderr) => {
       assert.ok(/📊 Node Version Summary:/.test(stdout), 'Expected "Node Version Summary" to be shown.')
-      assert.ok(/Minimum Node version (?:required|\(production\)|\(development\)):/.test(stdout), 'Expected minimum Node version message.')
-      assert.ok(/Current Node version:/.test(stdout), 'Expected current Node version message.')
+      assert.ok(/Minimum engines\.node:/.test(stdout), 'Expected minimum engines.node message.')
       done()
     })
   })

@@ -28,35 +28,48 @@ npm install -g npm-deprecated-check
 
 ## Node.js Version Compatibility
 
-The tool automatically analyzes Node.js version requirements across all dependencies and provides helpful information:
+The tool automatically analyzes Node.js version requirements across all dependencies and provides helpful information.
 
-### Version Summary
+### Default Output
 
-After checking dependencies, you'll see a summary of Node.js version requirements:
+By default, you get a concise summary showing the recommended engines.node value:
 
 ```
 📊 Node Version Summary:
-Minimum Node version (production): 18.18.0
+Minimum engines.node: >=20.0.0
+
+⚠️  Recommendation: Update package.json engines.node to ">=20.0.0"
+   Current: >=18.12
+```
+
+### Detailed Output (--verbose)
+
+Use the `--verbose` flag for detailed information:
+
+```bash
+ndc current --verbose
+```
+
+```
+📊 Node Version Summary (detailed):
+Minimum Node version (production): 20.0.0
 Minimum Node version (development): 20.17.0
 Current Node version: v25.4.0
+Project engines.node: >=18.12
+
+⚠️  Production dependencies require Node >=20.0.0, but package.json allows >=18.12
+   Consider updating engines.node to ">=20.0.0"
 ```
 
-If production and development requirements are the same:
-
-```
-📊 Node Version Summary:
-Minimum Node version required: 18.18.0 (same for production and development)
-Current Node version: v25.4.0
-```
-
-This helps you understand:
-- The minimum Node.js version needed for production deployments
-- Whether development tools require a higher Node.js version
-- If you can deploy with an older Node.js version while developing with a newer one
+The detailed view shows:
+- Separate production and development requirements
+- Your current Node.js version
+- The project's engines.node value
+- Detailed validation messages
 
 ### Compatible Version Suggestions
 
-When a dependency requires a newer Node.js version than you're currently running, the tool suggests a compatible alternative version:
+When a dependency requires a newer Node.js version than you're currently running, the tool suggests a compatible alternative version (shown with `--verbose`):
 
 ```
  WARN  eslint@9.35.0: 2024-10-05T18:45:12.345Z
@@ -68,18 +81,7 @@ This allows you to either upgrade your Node.js version or downgrade the dependen
 
 ### Engines Validation
 
-When checking a project with `ndc current`, the tool compares your `package.json` `engines.node` field against the actual requirements of your dependencies:
-
-```
-📊 Node Version Summary:
-Minimum Node version (production): 20.0.0
-Minimum Node version (development): 20.17.0
-Current Node version: v25.4.0
-Project engines.node: >=18.12
-
-⚠️  Production dependencies require Node >=20.0.0, but package.json allows >=18.12
-   Consider updating engines.node to ">=20.0.0"
-```
+When checking a project with `ndc current`, the tool compares your `package.json` `engines.node` field against the actual requirements of your dependencies.
 
 This helps you:
 - Keep `engines.node` in sync with actual dependency requirements
@@ -121,6 +123,7 @@ Options:
   --ignore <value>          ignore specific packages, example: request,tslint
   --failfast                exit the program if it has been deprecated
   --deep                    deep inspection for monorepo projects
+  --verbose                 show detailed Node version compatibility information
 ```
 
 For `global`:

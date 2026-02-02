@@ -12,6 +12,7 @@ export interface CommonOption extends OpenaiOption {
 export interface CurrentOption extends CommonOption {
   ignore: string
   deep: boolean
+  verbose: boolean
 }
 
 export interface GlobalOption extends CommonOption {

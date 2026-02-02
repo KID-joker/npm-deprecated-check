@@ -98,7 +98,7 @@ async function checkCurrentPackageJson(pkgPath: string, options: CurrentOption) 
 
     const dependencies = Object.assign(npmDependencies, dependenciesOfLockfile)
 
-    return checkDependencies(dependencies, options, dependencyTypes, projectEnginesNode)
+    return checkDependencies(dependencies, options, dependencyTypes, projectEnginesNode, options.verbose)
   }
   catch (e: any) {
     error(e.message)

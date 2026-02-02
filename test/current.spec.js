@@ -80,7 +80,7 @@ test('current tests', async (t) => {
       const normalDir = path.join(playgroundDir, 'npm', 'normal')
       exec(`cd ${normalDir} && node ${cli} current`, (_error, stdout, _stderr) => {
         assert.ok(/📊 Node Version Summary:/.test(stdout), 'Expected "Node Version Summary" to be shown.')
-        assert.ok(/Minimum Node version (?:required|\(production\)|\(development\)):/.test(stdout), 'Expected minimum Node version message.')
+        assert.ok(/Minimum engines\.node:/.test(stdout), 'Expected minimum engines.node message.')
         done()
       })
     })
