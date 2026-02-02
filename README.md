@@ -53,7 +53,9 @@ ndc current --verbose
 ```
 📊 Node Version Summary (detailed):
 Minimum Node version (production): 20.0.0
+  Determined by: eslint@9.35.0
 Minimum Node version (development): 20.17.0
+  Determined by: typescript@5.7.2
 Current Node version: v25.4.0
 Project engines.node: >=18.12
 
@@ -63,6 +65,7 @@ Project engines.node: >=18.12
 
 The detailed view shows:
 - Separate production and development requirements
+- **Which package determines each minimum version**
 - Your current Node.js version
 - The project's engines.node value
 - Detailed validation messages

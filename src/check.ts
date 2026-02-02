@@ -106,13 +106,22 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
 
       if (minRequiredNode.production === minRequiredNode.development) {
         log(`Minimum Node version required: ${ansis.magenta(minRequiredNode.production || minRequiredNode.development)} (same for production and development)`)
+        if (minRequiredNode.productionPackage) {
+          log(`  ${ansis.dim('Determined by:')} ${ansis.cyan(minRequiredNode.productionPackage)}`)
+        }
       }
       else {
         if (minRequiredNode.production) {
           log(`Minimum Node version (production): ${ansis.magenta(minRequiredNode.production)}`)
+          if (minRequiredNode.productionPackage) {
+            log(`  ${ansis.dim('Determined by:')} ${ansis.cyan(minRequiredNode.productionPackage)}`)
+          }
         }
         if (minRequiredNode.development) {
           log(`Minimum Node version (development): ${ansis.magenta(minRequiredNode.development)}`)
+          if (minRequiredNode.developmentPackage) {
+            log(`  ${ansis.dim('Determined by:')} ${ansis.cyan(minRequiredNode.developmentPackage)}`)
+          }
         }
       }
 
@@ -247,49 +256,59 @@ function findCompatibleVersion(packageRes: PackageVersions, versionOrRange: Vers
   return null
 }
 
-function calculateMinimumNodeVersion(results: PackageInfo[]): { production: string | null, development: string | null } {
-  const productionRequirements: string[] = []
-  const developmentRequirements: string[] = []
+function calculateMinimumNodeVersion(results: PackageInfo[]): {
+  production: string | null
+  development: string | null
+  productionPackage: string | null
+  developmentPackage: string | null
+} {
+  const productionRequirements: Array<{ requirement: string, package: string }> = []
+  const developmentRequirements: Array<{ requirement: string, package: string }> = []
 
   for (const result of results) {
     if (result.nodeRequirement) {
+      const pkgInfo = { requirement: result.nodeRequirement, package: `${result.name}@${result.version}` }
       if (result.dependencyType === 'production') {
-        productionRequirements.push(result.nodeRequirement)
+        productionRequirements.push(pkgInfo)
       }
       else if (result.dependencyType === 'development') {
-        developmentRequirements.push(result.nodeRequirement)
+        developmentRequirements.push(pkgInfo)
       }
       else {
         // If no type specified, assume it affects both
-        productionRequirements.push(result.nodeRequirement)
-        developmentRequirements.push(result.nodeRequirement)
+        productionRequirements.push(pkgInfo)
+        developmentRequirements.push(pkgInfo)
       }
     }
   }
 
-  const productionMin = findHighestMinimum(productionRequirements)
-  const developmentMin = findHighestMinimum(developmentRequirements)
+  const productionResult = findHighestMinimum(productionRequirements)
+  const developmentResult = findHighestMinimum(developmentRequirements)
 
   return {
-    production: productionMin,
-    development: developmentMin,
+    production: productionResult.version,
+    development: developmentResult.version,
+    productionPackage: productionResult.package,
+    developmentPackage: developmentResult.package,
   }
 }
 
-function findHighestMinimum(requirements: string[]): string | null {
+function findHighestMinimum(requirements: Array<{ requirement: string, package: string }>): { version: string | null, package: string | null } {
   if (requirements.length === 0)
-    return null
+    return { version: null, package: null }
 
   let highestMin: SemVer | null = null
+  let highestPackage: string | null = null
 
-  for (const requirement of requirements) {
+  for (const { requirement, package: pkg } of requirements) {
     const min = minVersion(requirement)
     if (min) {
       if (!highestMin || min.compare(highestMin) > 0) {
         highestMin = min
+        highestPackage = pkg
       }
     }
   }
 
-  return highestMin ? highestMin.version : null
+  return { version: highestMin?.version || null, package: highestPackage }
 }
