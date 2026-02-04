@@ -34,6 +34,7 @@ program
   .addOption(new Option('--ignore <value>', 'ignore specific packages'))
   .addOption(new Option('--failfast', 'exit the program if it has been deprecated'))
   .addOption(new Option('--deep', 'deep inspection for monorepo projects'))
+  .addOption(new Option('--verbose', 'show detailed Node version compatibility information'))
   .addOption(registryOption)
   .addOption(gptOption)
   .addOption(gptModelOption)

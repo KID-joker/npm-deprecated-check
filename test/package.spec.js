@@ -71,3 +71,43 @@ test('engine requirements for Node versions', async (t) => {
     })
   }
 })
+
+test('minimum Node version summary', async (t) => {
+  await t.test('should display minimum Node version required by all dependencies', (_t, done) => {
+    exec(`node ${cli} package eslint -r 9.35.0`, (_error, stdout, _stderr) => {
+      assert.ok(/📊 Node Version Summary:/.test(stdout), 'Expected "Node Version Summary" to be shown.')
+      assert.ok(/Minimum engines\.node:/.test(stdout), 'Expected minimum engines.node message.')
+      done()
+    })
+  })
+
+  await t.test('should show minimum Node version for packages with requirements', (_t, done) => {
+    exec(`node ${cli} package eslint -r 9.35.0`, (_error, stdout, _stderr) => {
+      // eslint 9.35.0 requires ^18.18.0 || ^20.9.0 || >=21.1.0, minimum is 18.18.0
+      assert.ok(/18\.18\.0/.test(stdout), 'Expected minimum version 18.18.0 to be displayed.')
+      done()
+    })
+  })
+})
+
+test('compatible version suggestion', async (t) => {
+  const currentNode = coerce(process.version)
+  const requiredNode = '^18.18.0 || ^20.9.0 || >=21.1.0'
+
+  if (!satisfies(currentNode, requiredNode)) {
+    await t.test('should suggest compatible version when Node requirement not met', (_t, done) => {
+      exec(`node ${cli} package eslint -r 9.35.0`, (_error, stdout, _stderr) => {
+        assert.ok(/Compatible version for current Node:/.test(stdout), 'Expected compatible version suggestion.')
+        done()
+      })
+    })
+  }
+  else {
+    await t.test('should not suggest compatible version when Node requirement is met', (_t, done) => {
+      exec(`node ${cli} package eslint -r 9.35.0`, (_error, stdout, _stderr) => {
+        assert.ok(!/Compatible version for current Node:/.test(stdout), 'Not expected compatible version when requirements are met.')
+        done()
+      })
+    })
+  }
+})

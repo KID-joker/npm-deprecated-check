@@ -12,6 +12,7 @@ export interface CommonOption extends OpenaiOption {
 export interface CurrentOption extends CommonOption {
   ignore: string
   deep: boolean
+  verbose: boolean
 }
 
 export interface GlobalOption extends CommonOption {
@@ -40,6 +41,9 @@ export interface PackageInfo {
   error?: string
   minimumUpgradeVersion?: string | null
   requiredNode?: string
+  compatibleVersion?: string | null
+  nodeRequirement?: string
+  dependencyType?: 'production' | 'development'
 }
 
 export interface PackageVersions {
