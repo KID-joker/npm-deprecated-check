@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       release_type:
-        description: "Release type"
+        description: Release type
         required: true
         default: patch
         type: choice
@@ -55,7 +55,7 @@ jobs:
           git add package.json
           git commit -m "chore(release): bump version (${{ inputs.release_type }})"
           git push origin main
-      
+
       - name: Create Git tag
         run: |
           git tag -a "$VERSION" -m "Release $VERSION"
