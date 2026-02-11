@@ -5,9 +5,17 @@ permissions:
   contents: write
 
 on:
-  push:
-    branches:
-      - release
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: Release type
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 jobs:
   release:
@@ -17,6 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
@@ -30,23 +39,27 @@ jobs:
         run: pnpm install
 
       - name: Build the project
-        run: node --run build
+        run: pnpm build
 
-      - name: Publish to npm
-        run: pnpm publish -r --access public --publish-branch release
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
-
-      - name: Get version from package.json
-        id: get_version
+      - name: Bump version
         run: |
-          VERSION=$(node -p "require('./package.json').version")
+          VERSION=$(pnpm version ${{ inputs.release_type }} --no-git-tag-version)
+          echo "New version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Create Git Tag
+      - name: Commit version bump
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "v${VERSION}" -m "Release v${VERSION}"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/KID-joker/npm-deprecated-check.git "v${VERSION}"
+
+          git add package.json
+          git commit -m "chore(release): bump version (${{ inputs.release_type }})"
+          git push origin main
+
+      - name: Create Git tag
+        run: |
+          git tag -a "$VERSION" -m "Release $VERSION"
+          git push origin "$VERSION"
+
+      - name: Publish to npm
+        run: npm publish --provenance
