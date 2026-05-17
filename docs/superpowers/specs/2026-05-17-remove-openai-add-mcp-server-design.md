@@ -90,8 +90,16 @@ interface CheckResult {
     }
     projectEnginesNode?: string
   } | null
+  summary: {
+    total: number
+    deprecated: number
+    nodeIncompatible: number
+    errors: number
+  }
 }
 ```
+
+The `summary` field is computed inside `checkDependencies()` from the result list, so both CLI and MCP consumers have access to it.
 
 - Remove all `log()`, `warn()`, `ok()`, `error()`, `startSpinner()`, `stopSpinner()` calls.
 - Remove `process.exit(1)` for failfast — return a flag instead, let caller decide.
@@ -100,7 +108,7 @@ interface CheckResult {
 
 - Exports `renderCheckResult(result: CheckResult, options: { verbose?: boolean, failfast?: boolean })`.
 - Contains all the ansis-colored output logic extracted from `check.ts`.
-- Spinner is managed by the CLI callers (`io/current.ts`, `io/global.ts`, `io/package.ts`): start spinner before calling `checkDependencies()`, stop after it returns, then call `renderCheckResult()`. This keeps `render.ts` focused on formatting only.
+- Spinner remains inside `checkDependencies()` (it runs per-package in the loop, not once for the entire check). To avoid spinner output in MCP mode, `checkDependencies()` accepts an optional `silent?: boolean` parameter. When `silent` is true, spinner calls are skipped. CLI callers pass `silent: false` (default), MCP callers pass `silent: true`.
 
 ### io/node.ts changes
 
@@ -266,7 +274,7 @@ Check globally installed packages.
 }
 ```
 
-**Output:** Same structure as `check_current_project` but without `nodeVersionSummary` (global packages don't have a project-level engines.node).
+**Output:** Same structure as `check_current_project`. The `nodeVersionSummary` is included (global packages still have engine requirements), but `projectEnginesNode` will be `null` since there is no project-level `package.json`.
 
 ### Tool 4: `check_node`
 
