@@ -1,3 +1,4 @@
+import type { CheckResult, VersionOrRange } from './types'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod'
@@ -28,6 +29,11 @@ export async function startServer() {
       )
 
       const pkg = result.packages[0]
+      if (pkg?.error) {
+        return {
+          content: [{ type: 'text' as const, text: JSON.stringify({ error: pkg.error }, null, 2) }],
+        }
+      }
       return {
         content: [{ type: 'text' as const, text: JSON.stringify(pkg, null, 2) }],
       }
@@ -45,14 +51,13 @@ export async function startServer() {
     async ({ ignore, deep, registry }) => {
       const { existsSync, readdirSync, readFileSync, statSync } = await import('node:fs')
       const { join } = await import('node:path')
-      const process = await import('node:process')
       const { isGitPackage, isLocalPackage, isURLPackage } = await import('./filter')
       const { getDependenciesOfLockfile } = await import('./packages/lockfiles')
       const { getDependenciesOfPackageJson } = await import('./packages/package_json')
 
       const currentPath = process.cwd()
       const pkgPaths = deep ? findPackageJsonDirs(currentPath) : [currentPath]
-      const allResults: any[] = []
+      const allResults: CheckResult[] = []
 
       for (const pkgPath of pkgPaths) {
         const packageJsonPath = join(pkgPath, 'package.json')
@@ -67,7 +72,7 @@ export async function startServer() {
         catch {}
 
         const ignores = ignore?.split(',') || []
-        const npmDependencies: Record<string, any> = {}
+        const npmDependencies: Record<string, VersionOrRange> = {}
         const dependencyTypes: Record<string, 'production' | 'development'> = {}
 
         for (const name in dependenciesOfPackageJson.dependencies) {
