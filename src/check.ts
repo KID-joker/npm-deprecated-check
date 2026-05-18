@@ -2,6 +2,7 @@ import type { SemVer } from 'semver'
 import type { CheckResult, CommonOption, PackageInfo, PackageVersions, VersionOrRange } from './types'
 import process from 'node:process'
 import { coerce, maxSatisfying, minVersion, satisfies, sort } from 'semver'
+import { createSafeFetch, SECURITY } from './security'
 import { getGlobalConfig } from './shared'
 import { getRegistry } from './utils/exec'
 import { startSpinner, stopSpinner } from './utils/spinner'
@@ -73,7 +74,8 @@ async function getPackageInfo(packageName: string, versionOrRange: VersionOrRang
   try {
     const registry = config.registry || globalConfig.registry || getRegistry()
     const _registry = registry.endsWith('/') ? registry : `${registry}/`
-    const response = await fetch(_registry + packageName)
+    const safeFetch = createSafeFetch({ timeout: SECURITY.FETCH_TIMEOUT_MS })
+    const response = await safeFetch(_registry + packageName)
     packageRes = await response.json() as PackageVersions
 
     if (!packageRes)
