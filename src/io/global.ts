@@ -1,4 +1,5 @@
 import type { GlobalOption } from '../types'
+import process from 'node:process'
 import { checkDependencies } from '../check'
 import { isLocalPackage } from '../filter'
 import { renderCheckResult } from '../render'
@@ -36,7 +37,10 @@ export default async function checkGlobal(options: GlobalOption) {
     )
 
     const result = await checkDependencies(filteredDeps, checkOptions)
-    renderCheckResult(result, { failfast: checkOptions.failfast })
+    renderCheckResult(result)
+    if (checkOptions.failfast && result.hasDeprecated) {
+      process.exit(1)
+    }
     return result
   }
   catch (e: any) {

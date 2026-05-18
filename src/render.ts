@@ -35,9 +35,6 @@ export function renderCheckResult(result: CheckResult, options?: { verbose?: boo
       }
       log()
 
-      if (options?.failfast) {
-        process.exit(1)
-      }
     }
   }
 
