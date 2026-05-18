@@ -3,13 +3,13 @@ export const SECURITY = {
   FETCH_TIMEOUT_MS: 15_000,
   MAX_PACKAGES_PER_CHECK: 200,
   MAX_PACKAGE_NAME_LENGTH: 214,
-  ALLOWED_REGISTRY_PROTOCOLS: ['https:', 'http:'],
+  ALLOWED_REGISTRY_PROTOCOLS: ['https:', 'http:'] as readonly string[],
   BLOCKED_HOSTS: [
     '169.254.169.254',
     'metadata.google.internal',
     '100.100.100.200',
     'metadata',
-  ],
+  ] as readonly string[],
   BLOCKED_NETWORKS: [
     /^10\./,
     /^172\.(1[6-9]|2\d|3[01])\./,
@@ -17,23 +17,23 @@ export const SECURITY = {
     /^127\./,
     /^0\./,
     /^169\.254\./,
-  ],
+  ] as readonly RegExp[],
   PACKAGE_NAME_PATTERN: /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/,
-}
+} as const
 
-export function validateRegistry(url: string): string | Error {
-  if (!url) return ''
+function validateRegistryUrl(url: string): Error | null {
+  if (!url) return null
 
   let parsed: URL
   try {
     parsed = new URL(url)
   }
   catch {
-    return new Error(`Invalid registry URL: ${url}`)
+    return new Error('Invalid registry URL')
   }
 
   if (!SECURITY.ALLOWED_REGISTRY_PROTOCOLS.includes(parsed.protocol)) {
-    return new Error(`Registry URL must use http or https protocol, got ${parsed.protocol}`)
+    return new Error('Registry URL must use http or https protocol')
   }
 
   const hostname = parsed.hostname.toLowerCase()
@@ -49,6 +49,13 @@ export function validateRegistry(url: string): string | Error {
     }
   }
 
+  return null
+}
+
+export function validateRegistry(url: string): string | Error {
+  if (!url) return ''
+  const error = validateRegistryUrl(url)
+  if (error) return error
   return url
 }
 
@@ -66,52 +73,26 @@ export function validatePackageName(name: string): string | Error {
   }
 
   if (!SECURITY.PACKAGE_NAME_PATTERN.test(name)) {
-    return new Error(`Invalid package name: ${name}`)
+    return new Error('Invalid package name')
   }
 
   return name
 }
 
 export function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), ms)
-
+  let timer: ReturnType<typeof setTimeout>
   return Promise.race([
     promise,
     new Promise<never>((_, reject) => {
-      controller.signal.addEventListener('abort', () => {
-        reject(new Error(`Operation timed out after ${ms}ms`))
-      })
+      timer = setTimeout(() => reject(new Error(`Operation timed out after ${ms}ms`)), ms)
     }),
-  ]).finally(() => clearTimeout(timeout))
+  ]).finally(() => clearTimeout(timer))
 }
 
 export function createSafeFetch(defaults: { timeout: number }): (url: string) => Promise<Response> {
   return async (url: string) => {
-    let parsed: URL
-    try {
-      parsed = new URL(url)
-    }
-    catch {
-      throw new Error(`Invalid fetch URL: ${url}`)
-    }
-
-    if (!SECURITY.ALLOWED_REGISTRY_PROTOCOLS.includes(parsed.protocol)) {
-      throw new Error(`Fetch URL must use http or https protocol, got ${parsed.protocol}`)
-    }
-
-    const hostname = parsed.hostname.toLowerCase()
-    for (const blocked of SECURITY.BLOCKED_HOSTS) {
-      if (hostname === blocked) {
-        throw new Error('Fetch URL points to a blocked host')
-      }
-    }
-
-    for (const network of SECURITY.BLOCKED_NETWORKS) {
-      if (network.test(hostname)) {
-        throw new Error('Fetch URL points to a private or reserved network')
-      }
-    }
+    const validationError = validateRegistryUrl(url)
+    if (validationError) throw validationError
 
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), defaults.timeout)
@@ -147,5 +128,5 @@ export function sanitizeError(error: unknown): string {
 }
 
 export function errorResult(message: string) {
-  return { content: [{ type: 'text' as const, text: JSON.stringify({ error: message }, null, 2) }] }
+  return { content: [{ type: 'text' as const, text: JSON.stringify({ error: sanitizeString(message) }, null, 2) }] }
 }
