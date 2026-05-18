@@ -106,7 +106,7 @@ export function createSafeFetch(defaults: { timeout: number }): (url: string) =>
   }
 }
 
-export function withPackageLimit(deps: Record<string, unknown>): Record<string, unknown> | Error {
+export function withPackageLimit<T>(deps: Record<string, T>): Record<string, T> | Error {
   if (Object.keys(deps).length > SECURITY.MAX_PACKAGES_PER_CHECK) {
     return new Error(`Too many packages to check (max ${SECURITY.MAX_PACKAGES_PER_CHECK})`)
   }
@@ -128,5 +128,5 @@ export function sanitizeError(error: unknown): string {
 }
 
 export function errorResult(message: string) {
-  return { content: [{ type: 'text' as const, text: JSON.stringify({ error: sanitizeString(message) }, null, 2) }] }
+  return { content: [{ type: 'text' as const, text: JSON.stringify({ error: message }, null, 2) }] }
 }

@@ -96,13 +96,15 @@ export async function startServer() {
 
         const pkgPaths = deep ? findPackageJsonDirs(currentPath, [], SECURITY.MAX_RECURSION_DEPTH, 0) : [currentPath]
         const allResults: CheckResult[] = []
+        const allDependencies: Record<string, VersionOrRange> = {}
+        const allDependencyTypes: Record<string, 'production' | 'development'> = {}
+        let projectEnginesNode: string | undefined
 
         for (const pkgPath of pkgPaths) {
           const packageJsonPath = join(pkgPath, 'package.json')
           const dependenciesOfPackageJson = getDependenciesOfPackageJson(packageJsonPath)
           if (!dependenciesOfPackageJson) continue
 
-          let projectEnginesNode: string | undefined
           try {
             const content = JSON.parse(readFileSync(packageJsonPath, 'utf-8'))
             projectEnginesNode = content.engines?.node
@@ -130,40 +132,29 @@ export async function startServer() {
           }
 
           const dependenciesOfLockfile = await getDependenciesOfLockfile(npmDependencies)
-          const dependencies = Object.assign(npmDependencies, dependenciesOfLockfile)
+          Object.assign(allDependencies, npmDependencies, dependenciesOfLockfile)
+          Object.assign(allDependencyTypes, dependencyTypes)
+        }
 
-          const limitResult = withPackageLimit(dependencies)
-          if (limitResult instanceof Error) return errorResult(limitResult.message)
+        const limitResult = withPackageLimit(allDependencies)
+        if (limitResult instanceof Error) return errorResult(limitResult.message)
 
-          const config = { registry: regResult, failfast: false }
-          const result = await checkDependencies(limitResult as Record<string, VersionOrRange>, config, {
-            dependencyTypes,
+        const config = { registry: regResult, failfast: false }
+        const result = await withTimeout(
+          checkDependencies(limitResult, config, {
+            dependencyTypes: allDependencyTypes,
             projectEnginesNode,
             silent: true,
-          })
-          allResults.push(result)
-        }
+          }),
+          SECURITY.FETCH_TIMEOUT_MS,
+        )
+        allResults.push(result)
 
         if (allResults.length === 0) {
           return { content: [{ type: 'text' as const, text: JSON.stringify({ packages: [], nodeVersionSummary: null, summary: { total: 0, deprecated: 0, nodeIncompatible: 0, errors: 0 } }, null, 2) }] }
         }
 
-        if (allResults.length === 1) {
-          return { content: [{ type: 'text' as const, text: JSON.stringify(allResults[0], null, 2) }] }
-        }
-
-        const merged = {
-          packages: allResults.flatMap(r => r.packages),
-          nodeVersionSummary: allResults[allResults.length - 1].nodeVersionSummary,
-          summary: {
-            total: allResults.reduce((sum, r) => sum + r.summary.total, 0),
-            deprecated: allResults.reduce((sum, r) => sum + r.summary.deprecated, 0),
-            nodeIncompatible: allResults.reduce((sum, r) => sum + r.summary.nodeIncompatible, 0),
-            errors: allResults.reduce((sum, r) => sum + r.summary.errors, 0),
-          },
-        }
-
-        return { content: [{ type: 'text' as const, text: JSON.stringify(merged, null, 2) }] }
+        return { content: [{ type: 'text' as const, text: JSON.stringify(allResults[0], null, 2) }] }
       }
       catch (e) {
         return errorResult(sanitizeError(e))
@@ -217,8 +208,14 @@ export async function startServer() {
           Object.entries(dependencies).filter(([key, { version }]) => !ignores.includes(key) && !isLocalPackage(version)),
         )
 
+        const limitResult = withPackageLimit(filteredDeps)
+        if (limitResult instanceof Error) return errorResult(limitResult.message)
+
         const config = { registry: regResult, failfast: false }
-        const checkResult = await checkDependencies(filteredDeps, config, { silent: true })
+        const checkResult = await withTimeout(
+          checkDependencies(limitResult, config, { silent: true }),
+          SECURITY.FETCH_TIMEOUT_MS,
+        )
 
         return { content: [{ type: 'text' as const, text: JSON.stringify(checkResult, null, 2) }] }
       }
