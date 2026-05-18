@@ -85,4 +85,9 @@ program
     checkConfig(configOption)
   })
 
-program.parse(process.argv)
+if (process.argv.includes('--mcp')) {
+  import('./mcp').then(m => m.startServer())
+}
+else {
+  program.parse(process.argv)
+}
