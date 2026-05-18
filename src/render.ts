@@ -5,7 +5,7 @@ import { coerce, minVersion, satisfies } from 'semver'
 import { error, log, ok, warn } from './utils/console'
 
 export function renderCheckResult(result: CheckResult, options?: { verbose?: boolean, failfast?: boolean }) {
-  const { packages, hasDeprecated, hasErrors, nodeVersionSummary } = result
+  const { packages, hasDeprecated, hasErrors, interrupted, nodeVersionSummary } = result
 
   for (const pkg of packages) {
     if (pkg.error) {
@@ -37,8 +37,12 @@ export function renderCheckResult(result: CheckResult, options?: { verbose?: boo
     }
   }
 
-  if (!hasErrors)
+  if (interrupted) {
+    warn('Check interrupted due to --failfast: deprecated dependency found.')
+  }
+  else if (!hasErrors) {
     ok(`All dependencies retrieved successfully.${hasDeprecated ? '' : ' There are no deprecated dependencies.'}`)
+  }
 
   // Node version summary
   if (nodeVersionSummary) {

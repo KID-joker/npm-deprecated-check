@@ -16,8 +16,11 @@ export default async function checkCurrent(options: CurrentOption) {
     if (options.deep) {
       log(`> ${pkgPath}`)
     }
-    await checkCurrentPackageJson(pkgPath, options)
+    const result = await checkCurrentPackageJson(pkgPath, options)
     log()
+    if (options.failfast && result?.hasDeprecated) {
+      process.exit(1)
+    }
   }
 }
 
@@ -98,9 +101,6 @@ async function checkCurrentPackageJson(pkgPath: string, options: CurrentOption) 
       projectEnginesNode,
     })
     renderCheckResult(result, { verbose: options.verbose })
-    if (options.failfast && result.hasDeprecated) {
-      process.exit(1)
-    }
     return result
   }
   catch (e: any) {

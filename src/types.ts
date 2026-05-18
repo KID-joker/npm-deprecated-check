@@ -64,6 +64,7 @@ export interface CheckResult {
   packages: PackageInfo[]
   hasDeprecated: boolean
   hasErrors: boolean
+  interrupted: boolean
   nodeVersionSummary: {
     currentNode: string
     minimumRequired: {

@@ -23,6 +23,7 @@ export async function checkDependencies(
   const resultList: PackageInfo[] = []
   let hasDeprecated = false
   let hasErrors = false
+  let interrupted = false
   const silent = options?.silent ?? false
 
   for (const packageName of packageList) {
@@ -41,6 +42,10 @@ export async function checkDependencies(
     }
     if (result.deprecated || result.requiredNode) {
       hasDeprecated = true
+      if (config.failfast) {
+        interrupted = true
+        break
+      }
     }
   }
 
@@ -66,6 +71,7 @@ export async function checkDependencies(
     packages: resultList,
     hasDeprecated,
     hasErrors,
+    interrupted,
     nodeVersionSummary,
     summary,
   }
