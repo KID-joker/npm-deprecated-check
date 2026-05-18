@@ -1,4 +1,4 @@
-<h1 align="center">🐦 npm-deprecated-check</h1>
+<h1 align="center">npm-deprecated-check</h1>
 <p align="center">Check for deprecated packages</p>
 
 ## Preview
@@ -19,12 +19,12 @@ npm install -g npm-deprecated-check
 
 - Check the packages of current project, global or specified is deprecated.
 - According to the version range of lockfile and package.json.
-- Recommend alternative packages through OpenAI.
 - Additionally checks if the running node version reached End Of Life.
 - Return the minimum upgradable version.
 - Check if the current environment meets the Node.js version range required for dependency operation.
 - Calculate the minimum Node.js version required across all dependencies.
 - Suggest compatible dependency versions when Node.js version requirements are not met.
+- MCP Server support: expose tools for external AI agents to consume deprecation data.
 
 ## Node.js Version Compatibility
 
@@ -35,10 +35,10 @@ The tool automatically analyzes Node.js version requirements across all dependen
 By default, you get a concise summary showing the recommended engines.node value:
 
 ```
-📊 Node Version Summary:
+Node Version Summary:
 Minimum engines.node: >=20.0.0
 
-⚠️  Recommendation: Update package.json engines.node to ">=20.0.0"
+Recommendation: Update package.json engines.node to ">=20.0.0"
    Current: >=18.12
 ```
 
@@ -51,7 +51,7 @@ ndc current --verbose
 ```
 
 ```
-📊 Node Version Summary (detailed):
+Node Version Summary (detailed):
 Minimum Node version (production): 20.0.0
   Determined by: eslint@9.35.0
 Minimum Node version (development): 20.17.0
@@ -59,37 +59,19 @@ Minimum Node version (development): 20.17.0
 Current Node version: v25.4.0
 Project engines.node: >=18.12
 
-⚠️  Production dependencies require Node >=20.0.0, but package.json allows >=18.12
+Production dependencies require Node >=20.0.0, but package.json allows >=18.12
    Consider updating engines.node to ">=20.0.0"
 ```
 
-The detailed view shows:
-- Separate production and development requirements
-- **Which package determines each minimum version**
-- Your current Node.js version
-- The project's engines.node value
-- Detailed validation messages
-
 ### Compatible Version Suggestions
 
-When a dependency requires a newer Node.js version than you're currently running, the tool suggests a compatible alternative version (shown with `--verbose`):
+When a dependency requires a newer Node.js version than you're currently running, the tool suggests a compatible alternative version:
 
 ```
- WARN  eslint@9.35.0: 2024-10-05T18:45:12.345Z
+WARN  eslint@9.35.0: 2024-10-05T18:45:12.345Z
 Required node: ^18.18.0 || ^20.9.0 || >=21.1.0
 Compatible version for current Node: 8.57.1
 ```
-
-This allows you to either upgrade your Node.js version or downgrade the dependency to a compatible version.
-
-### Engines Validation
-
-When checking a project with `ndc current`, the tool compares your `package.json` `engines.node` field against the actual requirements of your dependencies.
-
-This helps you:
-- Keep `engines.node` in sync with actual dependency requirements
-- Prevent CI/CD failures due to incorrect Node version specifications
-- Ensure contributors use compatible Node versions
 
 ## Usage
 
@@ -107,15 +89,6 @@ Commands:
   node                             check if used node version is deprecated (reached End Of Life)
   config [options]                 inspect and modify the config
   help [command]                   display help for command
-```
-
-`OpenAI` config:
-
-```bash
-Options:
-  --openaiKey <value>       recommend alternative packages via ChatGPT
-  --openaiModel <value>     ChatGPT model (choices: "gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o-mini", "gpt-4o")
-  --openaiBaseURL <value>   override the default base URL for the API
 ```
 
 For `current`:
@@ -142,12 +115,13 @@ Options:
 For `package`:
 
 ```bash
+Options:
   -r, --range <value>       check specified versions
   --registry <value>        specify registry URL, default: https://registry.npmjs.org/
   --failfast                exit the program if it has been deprecated
 ```
 
-You can also save them to global configuration:
+You can also save options to global configuration:
 
 ```bash
 Usage: ndc config [options]
@@ -161,7 +135,60 @@ Options:
   -l, --list                list all options
 ```
 
-The path should be `openaiKey`, `openaiModel`, `openaiBaseURL`.
+## MCP Server
+
+`npm-deprecated-check` can run as an MCP (Model Context Protocol) Server, exposing its checking capabilities as tools for AI agents.
+
+### Start the MCP Server
+
+```bash
+npx npm-deprecated-check --mcp
+```
+
+### Client Configuration
+
+**Claude Desktop / OpenCode:**
+
+```json
+{
+  "mcpServers": {
+    "npm-deprecated-check": {
+      "command": "npx",
+      "args": ["npm-deprecated-check", "--mcp"]
+    }
+  }
+}
+```
+
+### Available Tools
+
+| Tool | Description |
+|------|-------------|
+| `check_package` | Check if a specific npm package is deprecated |
+| `check_current_project` | Check all dependencies of the current project |
+| `check_global` | Check globally installed packages |
+| `check_node` | Check if the current Node.js version has reached EOL |
+
+All tools return structured JSON data. The AI agent can use this data to provide recommendations, suggest alternatives, or generate reports.
+
+### Tool Parameters
+
+**check_package:**
+- `packageName` (required) — npm package name
+- `range` (optional) — version range, e.g. `"^1.0.0"`
+- `registry` (optional) — custom npm registry URL
+
+**check_current_project:**
+- `ignore` (optional) — comma-separated package names to ignore
+- `deep` (optional) — deep inspection for monorepo projects
+- `registry` (optional) — custom npm registry URL
+
+**check_global:**
+- `manager` (optional) — package manager: `"npm"`, `"yarn"`, or `"pnpm"` (default: `"npm"`)
+- `ignore` (optional) — comma-separated package names to ignore
+- `registry` (optional) — custom npm registry URL
+
+**check_node:** No parameters.
 
 ## Credits
 
