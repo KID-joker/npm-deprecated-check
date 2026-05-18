@@ -1,9 +1,10 @@
+import type { NodeStatus } from '../types'
 import process from 'node:process'
 import { coerce, gt, major } from 'semver'
 import nodeReleases from '../schedule.json' assert { type: 'json' }
-import { ok, warn } from '../utils/console'
+import { renderNodeStatus } from '../render'
 
-interface versionInfo {
+interface VersionInfo {
   start: string
   lts?: string
   maintenance?: string
@@ -11,8 +12,8 @@ interface versionInfo {
   codename?: string
 }
 
-function getLatestNodeVersion(nodeReleases: Record<string, versionInfo>) {
-  const versions = Object.keys(nodeReleases)
+function getLatestNodeVersion(releases: Record<string, VersionInfo>) {
+  const versions = Object.keys(releases)
   const latestVersion = versions.reduce((_prev, _curr) => {
     const prev = coerce(_prev)!
     const curr = coerce(_curr)!
@@ -21,33 +22,54 @@ function getLatestNodeVersion(nodeReleases: Record<string, versionInfo>) {
   return latestVersion
 }
 
-function checkNode() {
+const releases = nodeReleases as unknown as Record<string, VersionInfo>
+
+export function getNodeStatus(): NodeStatus {
   const nodeVersion = coerce(process.version)!
-  const latestNodeVersion = coerce(getLatestNodeVersion(nodeReleases))!
-  const nodeVersionData = nodeReleases[`v${major(nodeVersion)}` as keyof typeof nodeReleases]
+  const latestNodeVersion = coerce(getLatestNodeVersion(releases))!
+  const nodeVersionData = releases[`v${major(nodeVersion)}`]
+
   if (nodeVersionData) {
     const endDate = new Date(nodeVersionData.end)
     const currentDate = new Date()
-    const isNodeVersionSupported = currentDate < endDate
-    if (isNodeVersionSupported) {
-      ok(`Your node version (${nodeVersion}) is supported until ${nodeVersionData.end}.`)
-    }
-    else {
-      warn(`Your node version (${nodeVersion}) is no longer supported since ${nodeVersionData.end}.`)
+    const isSupported = currentDate < endDate
+
+    return {
+      version: nodeVersion.version,
+      majorVersion: major(nodeVersion),
+      eol: !isSupported,
+      eolDate: nodeVersionData.end,
+      codename: nodeVersionData.codename || null,
+      supported: isSupported,
+      latestVersion: latestNodeVersion.version,
     }
   }
   else if (gt(nodeVersion, latestNodeVersion)) {
-    warn(`Your node version (${nodeVersion}) is higher than the latest version ${latestNodeVersion}. Please update 'npm-deprecated-check'.`)
+    return {
+      version: nodeVersion.version,
+      majorVersion: major(nodeVersion),
+      eol: false,
+      eolDate: null,
+      codename: null,
+      supported: true,
+      latestVersion: latestNodeVersion.version,
+    }
   }
   else {
-    warn(`Your node version (${nodeVersion}) can't be found in the release schedule. Please update 'npm-deprecated-check'.`)
-  }
-
-  return {
-    version: nodeVersion,
-    latestVersion: latestNodeVersion,
-    releases: nodeReleases,
+    return {
+      version: nodeVersion.version,
+      majorVersion: major(nodeVersion),
+      eol: false,
+      eolDate: null,
+      codename: null,
+      supported: false,
+      latestVersion: latestNodeVersion.version,
+    }
   }
 }
 
-export default checkNode
+export default function checkNode() {
+  const status = getNodeStatus()
+  renderNodeStatus(status)
+  return status
+}
