@@ -8,6 +8,7 @@ import checkCurrent from './io/current'
 import checkGlobal from './io/global'
 import checkNode from './io/node'
 import checkPackage from './io/package'
+
 export { checkCurrent, checkGlobal, checkNode, checkPackage }
 
 const registryOption = new Option('--registry <value>', 'specify registry URL')

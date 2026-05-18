@@ -26,12 +26,14 @@ export async function checkDependencies(
   const silent = options?.silent ?? false
 
   for (const packageName of packageList) {
-    if (!silent) startSpinner()
+    if (!silent)
+      startSpinner()
     const result = await getPackageInfo(packageName, dependencies[packageName], config)
     if (options?.dependencyTypes && options.dependencyTypes[packageName]) {
       result.dependencyType = options.dependencyTypes[packageName]
     }
-    if (!silent) stopSpinner()
+    if (!silent)
+      stopSpinner()
     resultList.push(result)
 
     if (result.error) {

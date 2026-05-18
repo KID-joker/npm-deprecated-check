@@ -1,11 +1,12 @@
 import type { CheckResult, VersionOrRange } from './types'
+import process from 'node:process'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod'
-import { checkDependencies } from './check'
-import { errorResult, sanitizeError, validatePackageName, validateRegistry, withPackageLimit, withTimeout, SECURITY } from './security'
-import { getNodeStatus } from './io/node'
 import { version } from '../package.json'
+import { checkDependencies } from './check'
+import { getNodeStatus } from './io/node'
+import { errorResult, sanitizeError, SECURITY, validatePackageName, validateRegistry, withPackageLimit, withTimeout } from './security'
 
 export async function startServer() {
   const server = new McpServer({
@@ -23,10 +24,12 @@ export async function startServer() {
     },
     async ({ packageName, range, registry }) => {
       const nameResult = validatePackageName(packageName)
-      if (nameResult instanceof Error) return errorResult(nameResult.message)
+      if (nameResult instanceof Error)
+        return errorResult(nameResult.message)
 
       const regResult = validateRegistry(registry || '')
-      if (regResult instanceof Error) return errorResult(regResult.message)
+      if (regResult instanceof Error)
+        return errorResult(regResult.message)
 
       try {
         const result = await withTimeout(
@@ -64,7 +67,8 @@ export async function startServer() {
     },
     async ({ ignore, deep, registry }) => {
       const regResult = validateRegistry(registry || '')
-      if (regResult instanceof Error) return errorResult(regResult.message)
+      if (regResult instanceof Error)
+        return errorResult(regResult.message)
 
       try {
         const { existsSync, readdirSync, readFileSync, statSync } = await import('node:fs')
@@ -76,18 +80,26 @@ export async function startServer() {
         const currentPath = process.cwd()
 
         function findPackageJsonDirs(dir: string, results: Array<string> = [], maxDepth: number = SECURITY.MAX_RECURSION_DEPTH, currentDepth: number = 0) {
-          if (currentDepth >= maxDepth) return results
+          if (currentDepth >= maxDepth)
+            return results
           const pkgPath = join(dir, 'package.json')
-          if (existsSync(pkgPath)) results.push(dir)
+          if (existsSync(pkgPath))
+            results.push(dir)
           let files
-          try { files = readdirSync(dir) }
-          catch { return results }
+          try {
+            files = readdirSync(dir)
+          }
+          catch {
+            return results
+          }
           for (const file of files) {
-            if (file === 'node_modules') continue
+            if (file === 'node_modules')
+              continue
             const dirPath = join(dir, file)
             try {
               const stat = statSync(dirPath)
-              if (stat.isDirectory()) findPackageJsonDirs(dirPath, results, maxDepth, currentDepth + 1)
+              if (stat.isDirectory())
+                findPackageJsonDirs(dirPath, results, maxDepth, currentDepth + 1)
             }
             catch {}
           }
@@ -103,7 +115,8 @@ export async function startServer() {
         for (const pkgPath of pkgPaths) {
           const packageJsonPath = join(pkgPath, 'package.json')
           const dependenciesOfPackageJson = getDependenciesOfPackageJson(packageJsonPath)
-          if (!dependenciesOfPackageJson) continue
+          if (!dependenciesOfPackageJson)
+            continue
 
           try {
             const content = JSON.parse(readFileSync(packageJsonPath, 'utf-8'))
@@ -137,7 +150,8 @@ export async function startServer() {
         }
 
         const limitResult = withPackageLimit(allDependencies)
-        if (limitResult instanceof Error) return errorResult(limitResult.message)
+        if (limitResult instanceof Error)
+          return errorResult(limitResult.message)
 
         const config = { registry: regResult, failfast: false }
         const result = await withTimeout(
@@ -172,7 +186,8 @@ export async function startServer() {
     },
     async ({ manager, ignore, registry }) => {
       const regResult = validateRegistry(registry || '')
-      if (regResult instanceof Error) return errorResult(regResult.message)
+      if (regResult instanceof Error)
+        return errorResult(regResult.message)
 
       try {
         const { execCommand } = await import('./utils/exec')
@@ -209,7 +224,8 @@ export async function startServer() {
         )
 
         const limitResult = withPackageLimit(filteredDeps)
-        if (limitResult instanceof Error) return errorResult(limitResult.message)
+        if (limitResult instanceof Error)
+          return errorResult(limitResult.message)
 
         const config = { registry: regResult, failfast: false }
         const checkResult = await withTimeout(

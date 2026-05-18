@@ -183,30 +183,30 @@ with nothing (delete the line).
 
 In the `packageInfo` object (lines 213-224), remove the `recommend` field. The object becomes:
 ```typescript
-  const packageInfo: PackageInfo = {
-    name: packageRes.name,
-    version,
-    time: packageRes.time[version],
-    deprecated,
-    minimumUpgradeVersion,
-    requiredNode,
-    compatibleVersion,
-    nodeRequirement,
-  }
+const packageInfo: PackageInfo = {
+  name: packageRes.name,
+  version,
+  time: packageRes.time[version],
+  deprecated,
+  minimumUpgradeVersion,
+  requiredNode,
+  compatibleVersion,
+  nodeRequirement,
+}
 ```
 
 Remove the `result.recommend` output block (lines 55-64):
 ```typescript
-      if (result.recommend) {
-        log(ansis.greenBright('Recommended: '))
-        if (Array.isArray(result.recommend)) {
-          for (const packageName of result.recommend)
-            log(`[${ansis.magenta(packageName)}](https://www.npmjs.com/package/${packageName})`)
-        }
-        else {
-          log(result.recommend)
-        }
-      }
+if (result.recommend) {
+  log(ansis.greenBright('Recommended: '))
+  if (Array.isArray(result.recommend)) {
+    for (const packageName of result.recommend)
+      log(`[${ansis.magenta(packageName)}](https://www.npmjs.com/package/${packageName})`)
+  }
+  else {
+    log(result.recommend)
+  }
+}
 ```
 
 - [ ] **Step 5: Remove OpenAI options from `src/cli.ts`**
@@ -228,10 +228,10 @@ Remove the import of `openaiModels` from `../shared` (line 5 partial).
 
 Remove the openaiModel validation block (lines 28-31):
 ```typescript
-    if (path === 'openaiModel' && !openaiModels.includes(value)) {
-      error(`error: option '--openaiModel <value>' argument '${value}' is invalid. Allowed choices are ${openaiModels.join(', ')}.`)
-      process.exit(1)
-    }
+if (path === 'openaiModel' && !openaiModels.includes(value)) {
+  error(`error: option '--openaiModel <value>' argument '${value}' is invalid. Allowed choices are ${openaiModels.join(', ')}.`)
+  process.exit(1)
+}
 ```
 
 - [ ] **Step 7: Simplify `src/io/package.ts`**
@@ -323,12 +323,14 @@ export async function checkDependencies(
   const silent = options?.silent ?? false
 
   for (const packageName of packageList) {
-    if (!silent) startSpinner()
+    if (!silent)
+      startSpinner()
     const result = await getPackageInfo(packageName, dependencies[packageName], config)
     if (options?.dependencyTypes && options.dependencyTypes[packageName]) {
       result.dependencyType = options.dependencyTypes[packageName]
     }
-    if (!silent) stopSpinner()
+    if (!silent)
+      stopSpinner()
     resultList.push(result)
 
     if (result.error) {
@@ -668,8 +670,8 @@ Replace the entire file with:
 import type { NodeStatus } from '../types'
 import process from 'node:process'
 import { coerce, gt, major } from 'semver'
-import nodeReleases from '../schedule.json' assert { type: 'json' }
 import { renderNodeStatus } from '../render'
+import nodeReleases from '../schedule.json' assert { type: 'json' }
 
 interface VersionInfo {
   start: string
@@ -983,9 +985,9 @@ Note: `zod` is used by MCP SDK's `server.tool()` for input schema validation.
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod'
+import { version } from '../package.json'
 import { checkDependencies } from './check'
 import { getNodeStatus } from './io/node'
-import { version } from '../package.json'
 
 export async function startServer() {
   const server = new McpServer({
@@ -1041,7 +1043,8 @@ export async function startServer() {
       for (const pkgPath of pkgPaths) {
         const packageJsonPath = join(pkgPath, 'package.json')
         const dependenciesOfPackageJson = getDependenciesOfPackageJson(packageJsonPath)
-        if (!dependenciesOfPackageJson) continue
+        if (!dependenciesOfPackageJson)
+          continue
 
         let projectEnginesNode: string | undefined
         try {
@@ -1107,16 +1110,19 @@ export async function startServer() {
 
       function findPackageJsonDirs(dir: string, results: Array<string> = []) {
         const pkgPath = join(dir, 'package.json')
-        if (existsSync(pkgPath)) results.push(dir)
+        if (existsSync(pkgPath))
+          results.push(dir)
         let files
         try { files = readdirSync(dir) }
         catch { return results }
         for (const file of files) {
-          if (file === 'node_modules') continue
+          if (file === 'node_modules')
+            continue
           const dirPath = join(dir, file)
           try {
             const stat = statSync(dirPath)
-            if (stat.isDirectory()) findPackageJsonDirs(dirPath, results)
+            if (stat.isDirectory())
+              findPackageJsonDirs(dirPath, results)
           }
           catch {}
         }

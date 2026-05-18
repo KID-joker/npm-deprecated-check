@@ -22,7 +22,8 @@ export const SECURITY = {
 } as const
 
 function validateRegistryUrl(url: string): Error | null {
-  if (!url) return null
+  if (!url)
+    return null
 
   let parsed: URL
   try {
@@ -53,9 +54,11 @@ function validateRegistryUrl(url: string): Error | null {
 }
 
 export function validateRegistry(url: string): string | Error {
-  if (!url) return ''
+  if (!url)
+    return ''
   const error = validateRegistryUrl(url)
-  if (error) return error
+  if (error)
+    return error
   return url
 }
 
@@ -92,7 +95,8 @@ export function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 export function createSafeFetch(defaults: { timeout: number }): (url: string) => Promise<Response> {
   return async (url: string) => {
     const validationError = validateRegistryUrl(url)
-    if (validationError) throw validationError
+    if (validationError)
+      throw validationError
 
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), defaults.timeout)
@@ -116,7 +120,8 @@ export function withPackageLimit<T>(deps: Record<string, T>): Record<string, T> 
 function sanitizeString(message: string): string {
   message = message.replace(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, '[redacted-ip]')
   message = message.replace(/(?:\/[\w.-]+){2,}/g, (match) => {
-    if (match.startsWith('/node_modules') || match.startsWith('/npm')) return match
+    if (match.startsWith('/node_modules') || match.startsWith('/npm'))
+      return match
     return '[redacted-path]'
   })
   return message

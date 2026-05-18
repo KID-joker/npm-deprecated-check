@@ -1,8 +1,8 @@
 import type { NodeStatus } from '../types'
 import process from 'node:process'
 import { coerce, gt, major } from 'semver'
-import nodeReleases from '../schedule.json' assert { type: 'json' }
 import { renderNodeStatus } from '../render'
+import nodeReleases from '../schedule.json' assert { type: 'json' }
 
 interface VersionInfo {
   start: string

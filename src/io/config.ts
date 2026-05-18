@@ -1,9 +1,8 @@
 import type { ConfigOption } from '../types'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
-import process from 'node:process'
 import { version } from '../../package.json'
 import { rcPath } from '../shared'
-import { error, log } from '../utils/console'
+import { log } from '../utils/console'
 import { get, set, unset } from '../utils/object'
 
 export default function configure(options: ConfigOption) {

@@ -34,7 +34,6 @@ export function renderCheckResult(result: CheckResult, options?: { verbose?: boo
         }
       }
       log()
-
     }
   }
 
