@@ -132,20 +132,18 @@ export function withPackageLimit(deps: Record<string, unknown>): Record<string, 
   return deps
 }
 
+function sanitizeString(message: string): string {
+  message = message.replace(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, '[redacted-ip]')
+  message = message.replace(/(?:\/[\w.-]+){2,}/g, (match) => {
+    if (match.startsWith('/node_modules') || match.startsWith('/npm')) return match
+    return '[redacted-path]'
+  })
+  return message
+}
+
 export function sanitizeError(error: unknown): string {
-  if (error instanceof Error) {
-    let message = error.message
-
-    message = message.replace(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, '[redacted-ip]')
-    message = message.replace(/(?:\/[\w.-]+){2,}/g, (match) => {
-      if (match.startsWith('/node_modules') || match.startsWith('/npm')) return match
-      return '[redacted-path]'
-    })
-
-    return message
-  }
-
-  return String(error)
+  const message = error instanceof Error ? error.message : String(error)
+  return sanitizeString(message)
 }
 
 export function errorResult(message: string) {
