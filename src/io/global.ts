@@ -7,7 +7,7 @@ import { execCommand } from '../utils/exec'
 const yarnRegexp = /"((?:@[a-z][a-z0-9-_.]*\/)?[a-z][a-z0-9-_.]*)@(\d+\.\d+\.\d+(?:-[a-z0-9-]+(?:\.[a-z0-9-]+)*)?)"/g
 
 export default function checkGlobal(options: GlobalOption) {
-  const { manager, ...openaiOptions } = options
+  const { manager, ignore, ...checkOptions } = options
   try {
     let dependencies: Record<string, { version: string }> = {}
     if (manager === 'pnpm') {
@@ -31,7 +31,7 @@ export default function checkGlobal(options: GlobalOption) {
 
     const ignores = options.ignore?.split(',') || []
 
-    return checkDependencies(Object.fromEntries(Object.entries(dependencies).filter(([key, { version }]) => !ignores.includes(key) && !isLocalPackage(version))), openaiOptions)
+    return checkDependencies(Object.fromEntries(Object.entries(dependencies).filter(([key, { version }]) => !ignores.includes(key) && !isLocalPackage(version))), checkOptions)
   }
   catch (e: any) {
     error(e.message)

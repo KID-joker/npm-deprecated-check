@@ -8,14 +8,9 @@ import checkCurrent from './io/current'
 import checkGlobal from './io/global'
 import checkNode from './io/node'
 import checkPackage from './io/package'
-import { openaiModels } from './shared'
-
 export { checkCurrent, checkGlobal, checkNode, checkPackage }
 
 const registryOption = new Option('--registry <value>', 'specify registry URL')
-const gptOption = new Option('--openaiKey <value>', 'recommend alternative packages via ChatGPT')
-const gptModelOption = new Option('--openaiModel <value>', 'ChatGPT model').choices(openaiModels)
-const gptBaseURL = new Option('--openaiBaseURL <value>', 'override the default base URL for the API')
 
 program
   .version(`npm-deprecated-check ${version}`)
@@ -36,9 +31,6 @@ program
   .addOption(new Option('--deep', 'deep inspection for monorepo projects'))
   .addOption(new Option('--verbose', 'show detailed Node version compatibility information'))
   .addOption(registryOption)
-  .addOption(gptOption)
-  .addOption(gptModelOption)
-  .addOption(gptBaseURL)
   .action((option: CurrentOption) => {
     checkNode()
     checkCurrent(option)
@@ -51,9 +43,6 @@ program
   .addOption(new Option('--ignore <value>', 'ignore specific packages'))
   .addOption(new Option('--failfast', 'exit the program if it has been deprecated'))
   .addOption(registryOption)
-  .addOption(gptOption)
-  .addOption(gptModelOption)
-  .addOption(gptBaseURL)
   .action((globalOption: GlobalOption) => {
     checkNode()
     checkGlobal(globalOption)
@@ -65,9 +54,6 @@ program
   .addOption(new Option('-r, --range <value>', 'check specified versions'))
   .addOption(new Option('--failfast', 'exit the program if it has been deprecated'))
   .addOption(registryOption)
-  .addOption(gptOption)
-  .addOption(gptModelOption)
-  .addOption(gptBaseURL)
   .action((packageName: string, option: { range?: string } & CommonOption) => {
     const packageOption: PackageOption = {
       packageName,

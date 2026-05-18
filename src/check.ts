@@ -3,7 +3,6 @@ import type { CommonOption, PackageInfo, PackageVersions, VersionOrRange } from 
 import process from 'node:process'
 import ansis from 'ansis'
 import { coerce, maxSatisfying, minVersion, satisfies, sort } from 'semver'
-import { recommendDependencies } from './chatgpt'
 import { getGlobalConfig } from './shared'
 import { error, log, ok, warn } from './utils/console'
 import { getRegistry } from './utils/exec'
@@ -50,16 +49,6 @@ export async function checkDependencies(dependencies: Record<string, VersionOrRa
         }
         else {
           log(ansis.yellowBright(`Since v${result.version}, there are no upgradable versions.`))
-        }
-      }
-      if (result.recommend) {
-        log(ansis.greenBright('Recommended: '))
-        if (Array.isArray(result.recommend)) {
-          for (const packageName of result.recommend)
-            log(`[${ansis.magenta(packageName)}](https://www.npmjs.com/package/${packageName})`)
-        }
-        else {
-          log(result.recommend)
         }
       }
       log()
@@ -182,7 +171,6 @@ async function getPackageInfo(packageName: string, versionOrRange: VersionOrRang
     return { name: packageName, error: `${packageName}: Please enter the correct range!` }
 
   const deprecated = packageRes.versions[version].deprecated
-  const recommend = deprecated ? await recommendDependencies(packageRes.name, config) : null
 
   let minimumUpgradeVersion: string | null = null
   if (deprecated) {
@@ -215,7 +203,6 @@ async function getPackageInfo(packageName: string, versionOrRange: VersionOrRang
     version,
     time: packageRes.time[version],
     deprecated,
-    recommend,
     minimumUpgradeVersion,
     requiredNode,
     compatibleVersion,
