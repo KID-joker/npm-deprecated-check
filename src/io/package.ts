@@ -1,14 +1,11 @@
-import type { PackageOption } from '../types'
-import process from 'node:process'
+import type { CommonOption, PackageOption } from '../types'
 import { checkDependencies } from '../check'
 import { renderCheckResult } from '../render'
 
 export default async function checkSpecified(options: PackageOption) {
-  const { packageName, range, ...checkOptions } = options
+  const { packageName, range, ...restOptions } = options
+  const checkOptions: CommonOption = { ...restOptions, failfast: false }
   const result = await checkDependencies({ [packageName]: { range } }, checkOptions)
   renderCheckResult(result)
-  if (checkOptions.failfast && result.hasDeprecated) {
-    process.exit(1)
-  }
   return result
 }

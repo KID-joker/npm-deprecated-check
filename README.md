@@ -118,7 +118,6 @@ For `package`:
 Options:
   -r, --range <value>       check specified versions
   --registry <value>        specify registry URL, default: https://registry.npmjs.org/
-  --failfast                exit the program if it has been deprecated
 ```
 
 You can also save options to global configuration:

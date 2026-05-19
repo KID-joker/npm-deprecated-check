@@ -14,7 +14,7 @@ export interface GlobalOption extends CommonOption {
   ignore: string
 }
 
-export interface PackageOption extends CommonOption {
+export interface PackageOption extends Omit<CommonOption, 'failfast'> {
   packageName: string
   range?: string
 }

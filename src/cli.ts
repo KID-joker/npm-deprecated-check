@@ -53,9 +53,8 @@ program
   .command('package <packageName>')
   .description('check for specified package')
   .addOption(new Option('-r, --range <value>', 'check specified versions'))
-  .addOption(new Option('--failfast', 'exit the program if it has been deprecated'))
   .addOption(registryOption)
-  .action((packageName: string, option: { range?: string } & CommonOption) => {
+  .action((packageName: string, option: { range?: string } & Omit<CommonOption, 'failfast'>) => {
     const packageOption: PackageOption = {
       packageName,
       ...option,
