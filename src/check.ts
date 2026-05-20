@@ -107,6 +107,11 @@ async function getPackageInfo(packageName: string, versionOrRange: VersionOrRang
 
   const deprecated = packageRes.versions[version].deprecated
 
+  let replacementHint: string | undefined
+  if (deprecated) {
+    replacementHint = extractReplacementHint(deprecated)
+  }
+
   let minimumUpgradeVersion: string | null = null
   if (deprecated) {
     const versions = sort(Object.keys(packageRes.versions))
@@ -137,6 +142,7 @@ async function getPackageInfo(packageName: string, versionOrRange: VersionOrRang
     version,
     time: packageRes.time[version],
     deprecated,
+    replacementHint,
     minimumUpgradeVersion,
     requiredNode,
     compatibleVersion,
@@ -227,4 +233,24 @@ function findHighestMinimum(requirements: Array<{ requirement: string, package: 
   }
 
   return { version: highestMin?.version || null, package: highestPackage }
+}
+
+function extractReplacementHint(deprecatedMessage: string): string | undefined {
+  const patterns = [
+    /use\s+(@[\w\-.~]+\/[\w\-.~]+|[\w\-.~]+)\s+instead/i,
+    /replaced\s+by\s+(@[\w\-.~]+\/[\w\-.~]+|[\w\-.~]+)/i,
+    /migrated?\s+to\s+(@[\w\-.~]+\/[\w\-.~]+|[\w\-.~]+)/i,
+    /deprecated\s+in\s+favor\s+of\s+(@[\w\-.~]+\/[\w\-.~]+|[\w\-.~]+)/i,
+    /prefer\s+(@[\w\-.~]+\/[\w\-.~]+|[\w\-.~]+)\s+instead/i,
+    /switch\s+to\s+(@[\w\-.~]+\/[\w\-.~]+|[\w\-.~]+)/i,
+    /please\s+use\s+(@[\w\-.~]+\/[\w\-.~]+|[\w\-.~]+)\s+instead/i,
+  ]
+
+  for (const pattern of patterns) {
+    const match = deprecatedMessage.match(pattern)
+    if (match?.[1])
+      return match[1]
+  }
+
+  return undefined
 }

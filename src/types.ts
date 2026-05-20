@@ -31,6 +31,7 @@ export interface PackageInfo {
   version?: string
   time?: string
   deprecated?: string | undefined
+  replacementHint?: string | undefined
   error?: string
   minimumUpgradeVersion?: string | null
   requiredNode?: string

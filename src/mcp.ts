@@ -1,4 +1,4 @@
-import type { CheckResult, VersionOrRange } from './types'
+import type { CheckResult, PackageInfo, VersionOrRange } from './types'
 import process from 'node:process'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
@@ -7,6 +7,68 @@ import { version } from '../package.json'
 import { checkDependencies } from './check'
 import { getNodeStatus } from './io/node'
 import { errorResult, sanitizeError, SECURITY, validatePackageName, validateRegistry, withPackageLimit, withTimeout } from './security'
+
+function buildDeprecatedGuidance(packages: PackageInfo[]): string | undefined {
+  const deprecatedPkgs = packages.filter(p => p.deprecated)
+  if (deprecatedPkgs.length === 0)
+    return undefined
+
+  const lines = [
+    '⚠️ Deprecated packages detected! Please recommend replacement packages for the user:',
+  ]
+
+  for (const pkg of deprecatedPkgs) {
+    const hint = pkg.replacementHint
+      ? ` (deprecation message suggests replacement: "${pkg.replacementHint}")`
+      : ` (deprecation message: "${pkg.deprecated}")`
+    lines.push(`  - ${pkg.name}@${pkg.version}${hint}`)
+  }
+
+  lines.push('')
+  lines.push('For each deprecated package above, you should:')
+  lines.push('1. If replacementHint is provided, recommend that package as the replacement')
+  lines.push('2. If no replacementHint, search for actively maintained alternatives or successor packages')
+  lines.push('3. Provide the installation command to replace the deprecated package')
+  lines.push('4. Mention any migration steps if applicable')
+
+  return lines.join('\n')
+}
+
+function enrichResultWithGuidance(result: CheckResult): CheckResult {
+  const guidance = buildDeprecatedGuidance(result.packages)
+  if (!guidance)
+    return result
+
+  return {
+    ...result,
+    _guidance: guidance,
+  } as CheckResult & { _guidance: string }
+}
+
+function enrichPackageWithGuidance(pkg: PackageInfo): PackageInfo & { _guidance?: string } {
+  if (!pkg.deprecated)
+    return pkg
+
+  const lines = [
+    '⚠️ This package is deprecated! Please recommend a replacement package for the user:',
+  ]
+
+  if (pkg.replacementHint) {
+    lines.push(`The deprecation message suggests replacement: "${pkg.replacementHint}"`)
+  }
+  else {
+    lines.push(`Deprecation message: "${pkg.deprecated}"`)
+  }
+
+  lines.push('')
+  lines.push('You should:')
+  lines.push('1. If replacementHint is provided, recommend that package as the replacement')
+  lines.push('2. If no replacementHint, search for actively maintained alternatives or successor packages')
+  lines.push('3. Provide the installation command to replace the deprecated package')
+  lines.push('4. Mention any migration steps if applicable')
+
+  return { ...pkg, _guidance: lines.join('\n') }
+}
 
 export async function startServer() {
   const server = new McpServer({
@@ -47,8 +109,9 @@ export async function startServer() {
             content: [{ type: 'text' as const, text: JSON.stringify({ error: sanitizeError(pkg.error) }, null, 2) }],
           }
         }
+        const enrichedPkg = enrichPackageWithGuidance(pkg)
         return {
-          content: [{ type: 'text' as const, text: JSON.stringify(pkg, null, 2) }],
+          content: [{ type: 'text' as const, text: JSON.stringify(enrichedPkg, null, 2) }],
         }
       }
       catch (e) {
@@ -61,23 +124,30 @@ export async function startServer() {
     'check_current_project',
     'Check all dependencies of the current project for deprecation, upgrade versions, and Node.js compatibility.',
     {
+      projectPath: z.string().optional().describe('Absolute path to the project root directory (must contain package.json). If not provided, uses the current working directory.'),
       ignore: z.string().optional().describe('Comma-separated package names to ignore'),
       deep: z.boolean().optional().describe('Deep inspection for monorepo projects'),
       registry: z.string().optional().describe('Custom npm registry URL'),
     },
-    async ({ ignore, deep, registry }) => {
+    async ({ projectPath, ignore, deep, registry }) => {
       const regResult = validateRegistry(registry || '')
       if (regResult instanceof Error)
         return errorResult(regResult.message)
 
       try {
         const { existsSync, readdirSync, readFileSync, statSync } = await import('node:fs')
-        const { join } = await import('node:path')
+        const { join, isAbsolute } = await import('node:path')
         const { isGitPackage, isLocalPackage, isURLPackage } = await import('./filter')
         const { getDependenciesOfLockfile } = await import('./packages/lockfiles')
         const { getDependenciesOfPackageJson } = await import('./packages/package_json')
 
-        const currentPath = process.cwd()
+        const currentPath = projectPath || process.cwd()
+        if (projectPath && !isAbsolute(projectPath))
+          return errorResult('projectPath must be an absolute path')
+        if (!existsSync(currentPath))
+          return errorResult(`Project path does not exist: ${currentPath}`)
+        if (!existsSync(join(currentPath, 'package.json')))
+          return errorResult(`No package.json found in: ${currentPath}`)
 
         function findPackageJsonDirs(dir: string, results: Array<string> = [], maxDepth: number = SECURITY.MAX_RECURSION_DEPTH, currentDepth: number = 0) {
           if (currentDepth >= maxDepth)
@@ -168,7 +238,8 @@ export async function startServer() {
           return { content: [{ type: 'text' as const, text: JSON.stringify({ packages: [], nodeVersionSummary: null, summary: { total: 0, deprecated: 0, nodeIncompatible: 0, errors: 0 } }, null, 2) }] }
         }
 
-        return { content: [{ type: 'text' as const, text: JSON.stringify(allResults[0], null, 2) }] }
+        const enrichedResult = enrichResultWithGuidance(allResults[0])
+        return { content: [{ type: 'text' as const, text: JSON.stringify(enrichedResult, null, 2) }] }
       }
       catch (e) {
         return errorResult(sanitizeError(e))
@@ -190,30 +261,35 @@ export async function startServer() {
         return errorResult(regResult.message)
 
       try {
-        const { execCommand } = await import('./utils/exec')
+        const { execCommand, resolveCommand } = await import('./utils/exec')
         const { isLocalPackage } = await import('./filter')
 
         const pkgManager = manager || 'npm'
+        const resolvedPath = resolveCommand(pkgManager)
+        if (!resolvedPath)
+          return errorResult(`Could not find "${pkgManager}" command. Please ensure ${pkgManager} is installed and available in your PATH. You can also try specifying a different package manager.`)
+
+        const pkgCmd = `"${resolvedPath}"`
         let dependencies: Record<string, { version: string }> = {}
 
         const yarnRegexp = /"((?:@[a-z][a-z0-9-_.]*\/)?[a-z][a-z0-9-_.]*)@(\d+\.\d+\.\d+(?:-[a-z0-9-]+(?:\.[a-z0-9-]+)*)?)"/g
 
         if (pkgManager === 'pnpm') {
-          const raw = execCommand('pnpm list -g --depth=0 --json')
+          const raw = execCommand(`${pkgCmd} list -g --depth=0 --json`)
           const result = JSON.parse(raw)
           dependencies = result
             .map((ele: { dependencies?: object }) => ele.dependencies)
             .reduce((prev: object, curr?: object) => Object.assign(prev, curr), {})
         }
         else if (pkgManager === 'yarn') {
-          const result = execCommand('yarn global list --depth=0')
+          const result = execCommand(`${pkgCmd} global list --depth=0`)
           const iterator = Array.from(result.matchAll(yarnRegexp), (m: string[]) => [m[1], m[2]])
           for (const dep of iterator) {
             dependencies[dep[0]] = { version: dep[1] }
           }
         }
         else {
-          const raw = execCommand('npm ls -g --depth=0 --json')
+          const raw = execCommand(`${pkgCmd} ls -g --depth=0 --json`)
           const result = JSON.parse(raw)
           dependencies = result.dependencies
         }
@@ -233,7 +309,8 @@ export async function startServer() {
           SECURITY.FETCH_TIMEOUT_MS,
         )
 
-        return { content: [{ type: 'text' as const, text: JSON.stringify(checkResult, null, 2) }] }
+        const enrichedResult = enrichResultWithGuidance(checkResult)
+        return { content: [{ type: 'text' as const, text: JSON.stringify(enrichedResult, null, 2) }] }
       }
       catch (e) {
         return errorResult(sanitizeError(e))
