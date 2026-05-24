@@ -31,7 +31,7 @@
     "dist"
   ],
   "engines": {
-    "node": ">=18.12"
+    "node": ">=22"
   },
   "preferGlobal": true,
   "scripts": {

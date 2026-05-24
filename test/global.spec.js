@@ -10,7 +10,6 @@ const __dirname = path.dirname(__filename)
 const cli = path.resolve(__dirname, '../dist/cli.mjs')
 
 const managers = ['npm', 'yarn', 'pnpm']
-const eslintPackage = process.version.startsWith('v18') || process.version.startsWith('v20') ? 'eslint@8' : 'eslint'
 const installCommands = {
   npm: 'npm i -g --force',
   yarn: 'yarn global add --force',
@@ -33,7 +32,7 @@ async function check(manager, t) {
     }
     catch {}
 
-    execSync(`${installCommands[manager]} ${eslintPackage}`)
+    execSync(`${installCommands[manager]} eslint`)
 
     await t.test(`check ${manager} that no deprecation warning is shown`, (_t, done) => {
       exec(`node ${cli} global --manager ${manager}`, (_error, stdout, _stderr) => {
