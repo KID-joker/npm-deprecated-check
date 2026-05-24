@@ -79,17 +79,6 @@ jobs:
           version: ${{ matrix.node-version < 22 && '10' || 'latest' }}
           run_install: false
 
-      - name: Check versions
-        run: |
-          yarn --version
-          pnpm --version
-
-      - name: Check global dependencies
-        run: |
-          npm ls -g --depth=0 --json
-          yarn global list --depth=0
-          pnpm list -g --depth=0 --json
-
       - name: Install production dependencies
         run: pnpm install --prod
 
