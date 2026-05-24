@@ -79,6 +79,9 @@ jobs:
           version: latest
           run_install: false
 
+      - name: Setup pnpm global bin
+        run: pnpm setup
+
       - name: Install production dependencies
         run: pnpm install --prod
 
