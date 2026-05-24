@@ -76,7 +76,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: latest
+          version: ${{ matrix.node-version < 22 && '10' || 'latest' }}
           run_install: false
 
       - name: Check versions
