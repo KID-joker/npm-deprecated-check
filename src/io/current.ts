@@ -6,18 +6,21 @@ import { checkDependencies } from '../check'
 import { isGitPackage, isLocalPackage, isURLPackage } from '../filter'
 import { getDependenciesOfLockfile } from '../packages/lockfiles'
 import { getDependenciesOfPackageJson } from '../packages/package_json'
+import { renderCheckResult } from '../render'
 import { error, log } from '../utils/console'
 
 export default async function checkCurrent(options: CurrentOption) {
   const currentPath = process.cwd()
   const pkgPaths = options.deep ? findPackageJsonDirs(currentPath) : [currentPath]
   for (const pkgPath of pkgPaths) {
-    // Only show path for deep inspection (monorepos)
     if (options.deep) {
       log(`> ${pkgPath}`)
     }
-    await checkCurrentPackageJson(pkgPath, options)
+    const result = await checkCurrentPackageJson(pkgPath, options)
     log()
+    if (options.failfast && result?.hasDeprecated) {
+      process.exit(1)
+    }
   }
 }
 
@@ -60,14 +63,12 @@ async function checkCurrentPackageJson(pkgPath: string, options: CurrentOption) 
   if (!dependenciesOfPackageJson)
     return
 
-  // Read engines.node from package.json
   let projectEnginesNode: string | undefined
   try {
     const packageJsonContent = JSON.parse(readFileSync(packageJsonPath, 'utf-8'))
     projectEnginesNode = packageJsonContent.engines?.node
   }
   catch {
-    // Ignore if package.json can't be read
   }
 
   try {
@@ -76,7 +77,6 @@ async function checkCurrentPackageJson(pkgPath: string, options: CurrentOption) 
     const npmDependencies: Record<string, VersionOrRange> = {}
     const dependencyTypes: Record<string, 'production' | 'development'> = {}
 
-    // Process production dependencies
     for (const name in dependenciesOfPackageJson.dependencies) {
       const versionInfo = dependenciesOfPackageJson.dependencies[name]
       if (!ignores.includes(name) && !isLocalPackage(versionInfo.range as string) && !isURLPackage(versionInfo.range as string) && !isGitPackage(versionInfo.range as string)) {
@@ -85,7 +85,6 @@ async function checkCurrentPackageJson(pkgPath: string, options: CurrentOption) 
       }
     }
 
-    // Process dev dependencies
     for (const name in dependenciesOfPackageJson.devDependencies) {
       const versionInfo = dependenciesOfPackageJson.devDependencies[name]
       if (!ignores.includes(name) && !isLocalPackage(versionInfo.range as string) && !isURLPackage(versionInfo.range as string) && !isGitPackage(versionInfo.range as string)) {
@@ -95,10 +94,14 @@ async function checkCurrentPackageJson(pkgPath: string, options: CurrentOption) 
     }
 
     const dependenciesOfLockfile = await getDependenciesOfLockfile(npmDependencies)
-
     const dependencies = Object.assign(npmDependencies, dependenciesOfLockfile)
 
-    return checkDependencies(dependencies, options, dependencyTypes, projectEnginesNode, options.verbose)
+    const result = await checkDependencies(dependencies, options, {
+      dependencyTypes,
+      projectEnginesNode,
+    })
+    renderCheckResult(result, { verbose: options.verbose })
+    return result
   }
   catch (e: any) {
     error(e.message)

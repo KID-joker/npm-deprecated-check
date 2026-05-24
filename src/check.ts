@@ -1,165 +1,89 @@
 import type { SemVer } from 'semver'
-import type { CommonOption, PackageInfo, PackageVersions, VersionOrRange } from './types'
+import type { CheckResult, CommonOption, PackageInfo, PackageVersions, VersionOrRange } from './types'
 import process from 'node:process'
-import ansis from 'ansis'
 import { coerce, maxSatisfying, minVersion, satisfies, sort } from 'semver'
-import { recommendDependencies } from './chatgpt'
+import { createSafeFetch, SECURITY } from './security'
 import { getGlobalConfig } from './shared'
-import { error, log, ok, warn } from './utils/console'
 import { getRegistry } from './utils/exec'
 import { startSpinner, stopSpinner } from './utils/spinner'
 
 const globalConfig = getGlobalConfig()
 const currentNode = coerce(process.version)!
 
-export async function checkDependencies(dependencies: Record<string, VersionOrRange>, config: CommonOption, dependencyTypes?: Record<string, 'production' | 'development'>, projectEnginesNode?: string, verbose?: boolean) {
+export async function checkDependencies(
+  dependencies: Record<string, VersionOrRange>,
+  config: CommonOption,
+  options?: {
+    dependencyTypes?: Record<string, 'production' | 'development'>
+    projectEnginesNode?: string
+    silent?: boolean
+  },
+): Promise<CheckResult> {
   const packageList = Object.keys(dependencies)
-  const resultList = []
-  let haveDeprecated = false
-  let haveErrors = false
+  const resultList: PackageInfo[] = []
+  let hasDeprecated = false
+  let hasErrors = false
+  let interrupted = false
+  const silent = options?.silent ?? false
+
   for (const packageName of packageList) {
-    startSpinner()
+    if (!silent)
+      startSpinner()
     const result = await getPackageInfo(packageName, dependencies[packageName], config)
-    if (dependencyTypes && dependencyTypes[packageName]) {
-      result.dependencyType = dependencyTypes[packageName]
+    if (options?.dependencyTypes && options.dependencyTypes[packageName]) {
+      result.dependencyType = options.dependencyTypes[packageName]
     }
-    stopSpinner()
+    if (!silent)
+      stopSpinner()
     resultList.push(result)
+
     if (result.error) {
-      haveErrors = true
-      error(result.error)
-      log()
+      hasErrors = true
     }
-
     if (result.deprecated || result.requiredNode) {
-      haveDeprecated = true
-      warn(`${result.name}@${result.version}: ${result.time}`)
-      if (result.deprecated)
-        log(`${ansis.yellowBright('Deprecated: ')}${result.deprecated}`)
-      if (result.requiredNode) {
-        log(`${ansis.magentaBright('Required node: ')}${result.requiredNode}`)
-        if (result.compatibleVersion) {
-          log(`${ansis.cyanBright('Compatible version for current Node: ')}${ansis.magenta(result.compatibleVersion)}`)
-        }
-      }
-
-      if (result.deprecated) {
-        if (result.minimumUpgradeVersion) {
-          log(ansis.greenBright('Minimum upgrade version: '))
-          log(`[${ansis.magenta(result.minimumUpgradeVersion)}](https://www.npmjs.com/package/${result.name}/v/${result.minimumUpgradeVersion})`)
-        }
-        else {
-          log(ansis.yellowBright(`Since v${result.version}, there are no upgradable versions.`))
-        }
-      }
-      if (result.recommend) {
-        log(ansis.greenBright('Recommended: '))
-        if (Array.isArray(result.recommend)) {
-          for (const packageName of result.recommend)
-            log(`[${ansis.magenta(packageName)}](https://www.npmjs.com/package/${packageName})`)
-        }
-        else {
-          log(result.recommend)
-        }
-      }
-      log()
-
+      hasDeprecated = true
       if (config.failfast) {
-        process.exit(1)
+        interrupted = true
+        break
       }
     }
   }
 
-  if (!haveErrors)
-    ok(`All dependencies retrieved successfully.${haveDeprecated ? '' : ' There are no deprecated dependencies.'}`)
-
-  // Calculate and display minimum required Node version across all dependencies
+  // Calculate minimum required Node version
   const minRequiredNode = calculateMinimumNodeVersion(resultList)
-  if (minRequiredNode.production || minRequiredNode.development) {
-    log()
-
-    // Default: Show minimal summary with recommendation
-    const productionMin = minRequiredNode.production || minRequiredNode.development
-
-    if (!verbose) {
-      // Minimal output: just the recommendation
-      if (productionMin) {
-        log(ansis.cyanBright('📊 Node Version Summary:'))
-        log(`Minimum engines.node: ${ansis.magenta(`>=${productionMin}`)}`)
-
-        // Show project's engines.node and validation if provided
-        if (projectEnginesNode) {
-          const projectMinVersion = minVersion(projectEnginesNode)
-          const requiredMinVersion = coerce(productionMin)
-
-          if (projectMinVersion && requiredMinVersion && projectMinVersion.compare(requiredMinVersion) < 0) {
-            log()
-            warn(`Recommendation: Update package.json engines.node to ">=${productionMin}"`)
-            log(`  Current: ${ansis.cyan(projectEnginesNode)}`)
-          }
-        }
+  const nodeVersionSummary = (minRequiredNode.production || minRequiredNode.development)
+    ? {
+        currentNode: process.version,
+        minimumRequired: minRequiredNode,
+        projectEnginesNode: options?.projectEnginesNode,
       }
-    }
-    else {
-      // Verbose: Show detailed breakdown
-      log(ansis.cyanBright('📊 Node Version Summary (detailed):'))
+    : null
 
-      if (minRequiredNode.production === minRequiredNode.development) {
-        log(`Minimum Node version required: ${ansis.magenta(minRequiredNode.production || minRequiredNode.development)} (same for production and development)`)
-        if (minRequiredNode.productionPackage) {
-          log(`  ${ansis.dim('Determined by:')} ${ansis.cyan(minRequiredNode.productionPackage)}`)
-        }
-      }
-      else {
-        if (minRequiredNode.production) {
-          log(`Minimum Node version (production): ${ansis.magenta(minRequiredNode.production)}`)
-          if (minRequiredNode.productionPackage) {
-            log(`  ${ansis.dim('Determined by:')} ${ansis.cyan(minRequiredNode.productionPackage)}`)
-          }
-        }
-        if (minRequiredNode.development) {
-          log(`Minimum Node version (development): ${ansis.magenta(minRequiredNode.development)}`)
-          if (minRequiredNode.developmentPackage) {
-            log(`  ${ansis.dim('Determined by:')} ${ansis.cyan(minRequiredNode.developmentPackage)}`)
-          }
-        }
-      }
-
-      log(`Current Node version: ${ansis.magenta(process.version)}`)
-
-      // Show project's engines.node if provided
-      if (projectEnginesNode) {
-        log(`Project engines.node: ${ansis.cyan(projectEnginesNode)}`)
-
-        // Validate engines.node against actual requirements
-        if (productionMin) {
-          const projectMinVersion = minVersion(projectEnginesNode)
-          const requiredMinVersion = coerce(productionMin)
-
-          if (projectMinVersion && requiredMinVersion && projectMinVersion.compare(requiredMinVersion) < 0) {
-            log()
-            warn(`Production dependencies require Node >=${productionMin}, but package.json allows ${projectEnginesNode}`)
-            log(`  ${ansis.yellowBright(`Consider updating engines.node to ">=${productionMin}"`)}`)
-          }
-        }
-      }
-    }
-
-    const requiredVersion = minRequiredNode.production || minRequiredNode.development
-    if (requiredVersion && !satisfies(currentNode, `>=${requiredVersion}`)) {
-      warn(`Your Node version is below the minimum requirement!`)
-    }
+  // Compute summary
+  const summary = {
+    total: resultList.length,
+    deprecated: resultList.filter(r => r.deprecated).length,
+    nodeIncompatible: resultList.filter(r => r.requiredNode).length,
+    errors: resultList.filter(r => r.error).length,
   }
 
-  return resultList
+  return {
+    packages: resultList,
+    hasDeprecated,
+    hasErrors,
+    interrupted,
+    nodeVersionSummary,
+    summary,
+  }
 }
 
-async function getPackageInfo(packageName: string, versionOrRange: VersionOrRange, config: CommonOption) {
+async function getPackageInfo(packageName: string, versionOrRange: VersionOrRange, config: CommonOption): Promise<PackageInfo> {
   let packageRes
   try {
     const registry = config.registry || globalConfig.registry || getRegistry()
     const _registry = registry.endsWith('/') ? registry : `${registry}/`
-    const response = await fetch(_registry + packageName)
+    const safeFetch = createSafeFetch({ timeout: SECURITY.FETCH_TIMEOUT_MS })
+    const response = await safeFetch(_registry + packageName)
     packageRes = await response.json() as PackageVersions
 
     if (!packageRes)
@@ -176,13 +100,17 @@ async function getPackageInfo(packageName: string, versionOrRange: VersionOrRang
     ? packageRes['dist-tags'][versionOrRange.range] || maxSatisfying(Object.keys(packageRes.versions), versionOrRange.range || '*') || null
     : packageRes['dist-tags'].latest
       ? packageRes['dist-tags'].latest
-      : error(`${packageName}: 'latest' dist-tag does not exist!`) as unknown as string)
+      : null)
 
   if (!version || !packageRes.versions[version])
     return { name: packageName, error: `${packageName}: Please enter the correct range!` }
 
   const deprecated = packageRes.versions[version].deprecated
-  const recommend = deprecated ? await recommendDependencies(packageRes.name, config) : null
+
+  let replacementHint: string | undefined
+  if (deprecated) {
+    replacementHint = extractReplacementHint(deprecated)
+  }
 
   let minimumUpgradeVersion: string | null = null
   if (deprecated) {
@@ -205,7 +133,6 @@ async function getPackageInfo(packageName: string, versionOrRange: VersionOrRang
       requiredNode = undefined
     }
     else {
-      // Find the highest version compatible with current Node
       compatibleVersion = findCompatibleVersion(packageRes, versionOrRange, currentNode)
     }
   }
@@ -215,7 +142,7 @@ async function getPackageInfo(packageName: string, versionOrRange: VersionOrRang
     version,
     time: packageRes.time[version],
     deprecated,
-    recommend,
+    replacementHint,
     minimumUpgradeVersion,
     requiredNode,
     compatibleVersion,
@@ -232,17 +159,13 @@ function findCompatibleVersion(packageRes: PackageVersions, versionOrRange: Vers
     const versionData = packageRes.versions[ver]
     const nodeRequirement = versionData.engines?.node
 
-    // Skip deprecated versions unless specifically requested
     if (versionData.deprecated)
       continue
 
-    // If no node requirement, it's compatible
     if (!nodeRequirement)
       return ver
 
-    // Check if this version is compatible with current Node
     if (satisfies(currentNode, nodeRequirement)) {
-      // If a range was specified, also check if this version satisfies it
       if (versionOrRange.range) {
         if (satisfies(ver, versionOrRange.range))
           return ver
@@ -275,7 +198,6 @@ function calculateMinimumNodeVersion(results: PackageInfo[]): {
         developmentRequirements.push(pkgInfo)
       }
       else {
-        // If no type specified, assume it affects both
         productionRequirements.push(pkgInfo)
         developmentRequirements.push(pkgInfo)
       }
@@ -311,4 +233,24 @@ function findHighestMinimum(requirements: Array<{ requirement: string, package: 
   }
 
   return { version: highestMin?.version || null, package: highestPackage }
+}
+
+function extractReplacementHint(deprecatedMessage: string): string | undefined {
+  const patterns = [
+    /use\s+(@[\w\-.~]+\/[\w\-.~]+|[\w\-.~]+)\s+instead/i,
+    /replaced\s+by\s+(@[\w\-.~]+\/[\w\-.~]+|[\w\-.~]+)/i,
+    /migrated?\s+to\s+(@[\w\-.~]+\/[\w\-.~]+|[\w\-.~]+)/i,
+    /deprecated\s+in\s+favor\s+of\s+(@[\w\-.~]+\/[\w\-.~]+|[\w\-.~]+)/i,
+    /prefer\s+(@[\w\-.~]+\/[\w\-.~]+|[\w\-.~]+)\s+instead/i,
+    /switch\s+to\s+(@[\w\-.~]+\/[\w\-.~]+|[\w\-.~]+)/i,
+    /please\s+use\s+(@[\w\-.~]+\/[\w\-.~]+|[\w\-.~]+)\s+instead/i,
+  ]
+
+  for (const pattern of patterns) {
+    const match = deprecatedMessage.match(pattern)
+    if (match?.[1])
+      return match[1]
+  }
+
+  return undefined
 }

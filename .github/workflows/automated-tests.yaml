@@ -55,7 +55,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        node-version: [24, 22, 20, 18]
+        node-version: [24, 22]
 
     steps:
       - name: Checkout code
@@ -79,25 +79,11 @@ jobs:
           version: latest
           run_install: false
 
-      - name: Check versions
-        run: |
-          yarn --version
-          pnpm --version
-
-      - name: Check global dependencies
-        run: |
-          npm ls -g --depth=0 --json
-          yarn global list --depth=0
-          pnpm list -g --depth=0 --json
+      - name: Setup pnpm global bin
+        run: echo "$PNPM_HOME/bin" >> $GITHUB_PATH
 
       - name: Install production dependencies
         run: pnpm install --prod
 
-      # node --run requires Node.js >= 22
-      - name: Run tests (Node < 22)
-        if: ${{ matrix.node-version < 22 }}
-        run: npm run test
-
-      - name: Run tests (Node >= 22)
-        if: ${{ matrix.node-version >= 22 }}
+      - name: Run tests
         run: node --run test

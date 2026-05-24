@@ -1,8 +1,11 @@
-import type { PackageOption } from '../types'
+import type { CommonOption, PackageOption } from '../types'
 import { checkDependencies } from '../check'
+import { renderCheckResult } from '../render'
 
-export default function checkSpecified(options: PackageOption) {
-  const { packageName, range, ...openaiOptions } = options
-
-  return checkDependencies({ [packageName]: { range } }, openaiOptions)
+export default async function checkSpecified(options: PackageOption) {
+  const { packageName, range, ...restOptions } = options
+  const checkOptions: CommonOption = { ...restOptions, failfast: false }
+  const result = await checkDependencies({ [packageName]: { range } }, checkOptions)
+  renderCheckResult(result)
+  return result
 }

@@ -1,10 +1,4 @@
-export interface OpenaiOption {
-  openaiKey?: string
-  openaiModel?: string
-  openaiBaseURL?: string
-}
-
-export interface CommonOption extends OpenaiOption {
+export interface CommonOption {
   registry: string
   failfast: boolean
 }
@@ -20,7 +14,7 @@ export interface GlobalOption extends CommonOption {
   ignore: string
 }
 
-export interface PackageOption extends CommonOption {
+export interface PackageOption extends Omit<CommonOption, 'failfast'> {
   packageName: string
   range?: string
 }
@@ -37,7 +31,7 @@ export interface PackageInfo {
   version?: string
   time?: string
   deprecated?: string | undefined
-  recommend?: Array<string> | string | null
+  replacementHint?: string | undefined
   error?: string
   minimumUpgradeVersion?: string | null
   requiredNode?: string
@@ -65,4 +59,37 @@ export interface PackageVersions {
 export interface VersionOrRange {
   version?: string
   range?: string
+}
+
+export interface CheckResult {
+  packages: PackageInfo[]
+  hasDeprecated: boolean
+  hasErrors: boolean
+  interrupted: boolean
+  nodeVersionSummary: {
+    currentNode: string
+    minimumRequired: {
+      production: string | null
+      development: string | null
+      productionPackage: string | null
+      developmentPackage: string | null
+    }
+    projectEnginesNode?: string
+  } | null
+  summary: {
+    total: number
+    deprecated: number
+    nodeIncompatible: number
+    errors: number
+  }
+}
+
+export interface NodeStatus {
+  version: string
+  majorVersion: number
+  eol: boolean
+  eolDate: string | null
+  codename: string | null
+  supported: boolean
+  latestVersion: string
 }
