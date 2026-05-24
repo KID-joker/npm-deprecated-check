@@ -42,6 +42,12 @@ jobs:
       - name: Build the project
         run: pnpm build
 
+      - name: Bump version
+        run: |
+          VERSION=$(pnpm version ${{ inputs.release_type }} --no-git-tag-version)
+          echo "New version: $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
       - name: Commit version bump
         run: |
           git config --global user.name "github-actions[bot]"
@@ -49,26 +55,12 @@ jobs:
 
           git add package.json
           git commit -m "chore(release): bump version (${{ inputs.release_type }})"
-          git push origin main --tags
-
-      - name: Bump version
-        run: |
-          VERSION=$(pnpm version ${{ inputs.release_type }})
-          echo "New version: $VERSION"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          git push origin main
 
       - name: Create Git tag
         run: |
-          git tag -a "$VERSION" -m "Release $VERSION"
+          git tag -a "$VERSION" -m "Release ${{ env.VERSION }}"
           git push origin "$VERSION"
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ VERSION }} 
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Publish to npm
         run: npm publish --provenance
