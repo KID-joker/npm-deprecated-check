@@ -19,6 +19,13 @@ export interface PackageOption extends Omit<CommonOption, 'failfast'> {
   range?: string
 }
 
+export interface CompatOption extends CommonOption {
+  packageName?: string
+  node?: string
+  deep: boolean
+  ignore: string
+}
+
 export interface ConfigOption {
   get?: string
   set?: Array<string>

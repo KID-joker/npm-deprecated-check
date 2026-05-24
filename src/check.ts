@@ -17,6 +17,7 @@ export async function checkDependencies(
     dependencyTypes?: Record<string, 'production' | 'development'>
     projectEnginesNode?: string
     silent?: boolean
+    targetNodeVersion?: string
   },
 ): Promise<CheckResult> {
   const packageList = Object.keys(dependencies)
@@ -29,7 +30,7 @@ export async function checkDependencies(
   for (const packageName of packageList) {
     if (!silent)
       startSpinner()
-    const result = await getPackageInfo(packageName, dependencies[packageName], config)
+    const result = await getPackageInfo(packageName, dependencies[packageName], config, options?.targetNodeVersion)
     if (options?.dependencyTypes && options.dependencyTypes[packageName]) {
       result.dependencyType = options.dependencyTypes[packageName]
     }
@@ -77,7 +78,8 @@ export async function checkDependencies(
   }
 }
 
-async function getPackageInfo(packageName: string, versionOrRange: VersionOrRange, config: CommonOption): Promise<PackageInfo> {
+async function getPackageInfo(packageName: string, versionOrRange: VersionOrRange, config: CommonOption, targetNodeVersion?: string): Promise<PackageInfo> {
+  const effectiveNode = coerce(targetNodeVersion) || currentNode
   let packageRes
   try {
     const registry = config.registry || globalConfig.registry || getRegistry()
@@ -129,11 +131,11 @@ async function getPackageInfo(packageName: string, versionOrRange: VersionOrRang
   let compatibleVersion: string | null = null
 
   if (requiredNode) {
-    if (satisfies(currentNode, requiredNode)) {
+    if (satisfies(effectiveNode, requiredNode)) {
       requiredNode = undefined
     }
     else {
-      compatibleVersion = findCompatibleVersion(packageRes, versionOrRange, currentNode)
+      compatibleVersion = findCompatibleVersion(packageRes, versionOrRange, effectiveNode)
     }
   }
 

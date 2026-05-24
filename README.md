@@ -24,6 +24,7 @@ npm install -g npm-deprecated-check
 - Check if the current environment meets the Node.js version range required for dependency operation.
 - Calculate the minimum Node.js version required across all dependencies.
 - Suggest compatible dependency versions when Node.js version requirements are not met.
+- Check Node.js version compatibility for a project or package when upgrading or downgrading Node.js.
 - MCP Server support: expose tools for external AI agents to consume deprecation data.
 
 ## Node.js Version Compatibility
@@ -86,6 +87,7 @@ Commands:
   current [options]                check the packages of the current project
   global [options]                 check global packages, default: npm
   package [options] <packageName>  check for specified package
+  compat [options] [packageName]   check Node.js version compatibility for project or package
   node                             check if used node version is deprecated (reached End Of Life)
   config [options]                 inspect and modify the config
   help [command]                   display help for command
@@ -118,6 +120,46 @@ For `package`:
 Options:
   -r, --range <value>       check specified versions
   --registry <value>        specify registry URL, default: https://registry.npmjs.org/
+```
+
+For `compat`:
+
+```bash
+Usage: ndc compat [packageName] [options]
+
+check Node.js version compatibility for project or package
+
+Options:
+  --node <version>          target Node.js version (e.g. "18", "20.11.0"), default: current Node version
+  --deep                    deep inspection for monorepo projects (project mode only)
+  --ignore <value>          ignore specific packages, example: request,tslint
+  --registry <value>        specify registry URL, default: https://registry.npmjs.org/
+```
+
+### Compat Examples
+
+Check current project against the current Node version:
+
+```bash
+ndc compat
+```
+
+Check current project against a target Node version:
+
+```bash
+ndc compat --node 18
+```
+
+Check a specific package against a target Node version:
+
+```bash
+ndc compat esbuild --node 18
+```
+
+Deep check monorepo projects:
+
+```bash
+ndc compat --node 20 --deep
 ```
 
 You can also save options to global configuration:
@@ -167,6 +209,7 @@ npx npm-deprecated-check --mcp
 | `check_current_project` | Check all dependencies of the current project |
 | `check_global` | Check globally installed packages |
 | `check_node` | Check if the current Node.js version has reached EOL |
+| `check_compat` | Check Node.js version compatibility for a project or package |
 
 All tools return structured JSON data. The AI agent can use this data to provide recommendations, suggest alternatives, or generate reports.
 
@@ -188,6 +231,14 @@ All tools return structured JSON data. The AI agent can use this data to provide
 - `registry` (optional) — custom npm registry URL
 
 **check_node:** No parameters.
+
+**check_compat:**
+- `packageName` (optional) — npm package name. If not provided, checks the current project
+- `nodeVersion` (optional) — target Node.js version (e.g. `"18"`, `"20.11.0"`). Defaults to current Node version
+- `projectPath` (optional) — absolute path to project root (only used when `packageName` is not provided)
+- `deep` (optional) — deep inspection for monorepo projects
+- `ignore` (optional) — comma-separated package names to ignore
+- `registry` (optional) — custom npm registry URL
 
 ## Credits
 

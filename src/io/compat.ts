@@ -1,44 +1,65 @@
-import type { CurrentOption, VersionOrRange } from '../types'
-import { readFileSync } from 'node:fs'
+import type { CompatOption, VersionOrRange } from '../types'
 import { join } from 'node:path'
 import process from 'node:process'
+import { coerce } from 'semver'
 import { checkDependencies } from '../check'
 import { isGitPackage, isLocalPackage, isURLPackage } from '../filter'
 import { getDependenciesOfLockfile } from '../packages/lockfiles'
 import { getDependenciesOfPackageJson } from '../packages/package_json'
-import { renderCheckResult } from '../render'
-import { error, log } from '../utils/console'
+import { renderCompatResult } from '../render'
+import { error, log, warn } from '../utils/console'
 import { findPackageJsonDirs } from '../utils/fs'
 
-export default async function checkCurrent(options: CurrentOption) {
+export default async function checkCompat(options: CompatOption) {
+  const targetNodeVersion = options.node || process.version
+  const effectiveNode = coerce(targetNodeVersion)
+  if (!effectiveNode) {
+    warn(`Invalid Node version: "${targetNodeVersion}", falling back to current Node version (${process.version})`)
+  }
+
+  if (options.packageName) {
+    await checkPackageCompat(options, targetNodeVersion)
+  }
+  else {
+    await checkProjectCompat(options, targetNodeVersion)
+  }
+}
+
+async function checkPackageCompat(options: CompatOption, targetNodeVersion: string) {
+  const { packageName, ...restOptions } = options
+  const checkOptions = { ...restOptions, failfast: false }
+
+  const result = await checkDependencies(
+    { [packageName!]: { range: undefined } },
+    checkOptions,
+    { targetNodeVersion },
+  )
+
+  renderCompatResult(result, {
+    targetNodeVersion,
+    packageName: packageName!,
+  })
+}
+
+async function checkProjectCompat(options: CompatOption, targetNodeVersion: string) {
   const currentPath = process.cwd()
   const pkgPaths = options.deep ? findPackageJsonDirs(currentPath) : [currentPath]
+
   for (const pkgPath of pkgPaths) {
     if (options.deep) {
       log(`> ${pkgPath}`)
     }
-    const result = await checkCurrentPackageJson(pkgPath, options)
+    await checkProjectPackageJson(pkgPath, options, targetNodeVersion)
     log()
-    if (options.failfast && result?.hasDeprecated) {
-      process.exit(1)
-    }
   }
 }
 
-async function checkCurrentPackageJson(pkgPath: string, options: CurrentOption) {
+async function checkProjectPackageJson(pkgPath: string, options: CompatOption, targetNodeVersion: string) {
   const packageJsonPath = join(pkgPath, 'package.json')
   const dependenciesOfPackageJson = getDependenciesOfPackageJson(packageJsonPath)
 
   if (!dependenciesOfPackageJson)
     return
-
-  let projectEnginesNode: string | undefined
-  try {
-    const packageJsonContent = JSON.parse(readFileSync(packageJsonPath, 'utf-8'))
-    projectEnginesNode = packageJsonContent.engines?.node
-  }
-  catch {
-  }
 
   try {
     const ignores = options.ignore?.split(',') || []
@@ -65,11 +86,11 @@ async function checkCurrentPackageJson(pkgPath: string, options: CurrentOption) 
     const dependenciesOfLockfile = await getDependenciesOfLockfile(npmDependencies)
     const dependencies = Object.assign(npmDependencies, dependenciesOfLockfile)
 
-    const result = await checkDependencies(dependencies, options, {
+    const result = await checkDependencies(dependencies, { registry: options.registry, failfast: false }, {
       dependencyTypes,
-      projectEnginesNode,
+      targetNodeVersion,
     })
-    renderCheckResult(result, { verbose: options.verbose })
+    renderCompatResult(result, { targetNodeVersion })
     return result
   }
   catch (e: any) {

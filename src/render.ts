@@ -132,3 +132,80 @@ export function renderNodeStatus(status: NodeStatus) {
     warn(`Your node version (${status.version}) can't be found in the release schedule. Please update 'npm-deprecated-check'.`)
   }
 }
+
+export function renderCompatResult(
+  result: CheckResult,
+  options?: {
+    targetNodeVersion?: string
+    packageName?: string
+  },
+) {
+  const { packages, hasErrors, nodeVersionSummary } = result
+  const targetNode = options?.targetNodeVersion || process.version
+  const targetNodeClean = coerce(targetNode)?.version || targetNode
+
+  if (options?.packageName) {
+    const pkg = packages[0]
+    if (pkg?.error) {
+      error(pkg.error)
+      return
+    }
+    warn(`${pkg!.name}@${pkg!.version}: ${pkg!.time}`)
+    if (pkg!.nodeRequirement) {
+      if (!pkg!.requiredNode) {
+        log(`${ansis.cyanBright('Compatible with Node ')}${ansis.magenta(targetNode)}${ansis.cyanBright(' (engines.node: ')}${ansis.magenta(pkg!.nodeRequirement)}${ansis.cyanBright(')')}`)
+      }
+      else {
+        log(`${ansis.magentaBright('Required node: ')}${pkg!.requiredNode}`)
+        if (pkg!.compatibleVersion) {
+          log(`${ansis.cyanBright(`Compatible version for Node ${targetNodeClean}: `)}${ansis.magenta(pkg!.compatibleVersion)}`)
+        }
+      }
+    }
+    else {
+      log(`${ansis.cyanBright('Compatible with Node ')}${ansis.magenta(targetNode)}${ansis.cyanBright(' (no engines.node constraint)')}`)
+    }
+    log()
+    return
+  }
+
+  for (const pkg of packages) {
+    if (pkg.error) {
+      error(pkg.error)
+      log()
+    }
+
+    if (pkg.requiredNode) {
+      warn(`${pkg.name}@${pkg.version}: ${pkg.time}`)
+      log(`${ansis.magentaBright('Required node: ')}${pkg.requiredNode}`)
+      if (pkg.compatibleVersion) {
+        log(`${ansis.cyanBright(`Compatible version for Node ${targetNodeClean}: `)}${ansis.magenta(pkg.compatibleVersion)}`)
+      }
+      log()
+    }
+  }
+
+  const incompatibleCount = packages.filter(p => p.requiredNode).length
+
+  if (!hasErrors && incompatibleCount === 0) {
+    ok(`All dependencies are compatible with Node ${targetNode}.`)
+  }
+
+  if (nodeVersionSummary) {
+    const { minimumRequired } = nodeVersionSummary
+    const productionMin = minimumRequired.production || minimumRequired.development
+
+    log()
+
+    if (productionMin) {
+      log(ansis.cyanBright('📊 Node Version Summary:'))
+      log(`Minimum engines.node: ${ansis.magenta(`>=${productionMin}`)}`)
+      log(`Target Node version: ${ansis.magenta(targetNode)}`)
+
+      const targetNodeSemver = coerce(targetNode)
+      if (targetNodeSemver && !satisfies(targetNodeSemver, `>=${productionMin}`)) {
+        warn(`Target Node version is below the minimum requirement!`)
+      }
+    }
+  }
+}
