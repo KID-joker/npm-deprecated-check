@@ -66,12 +66,6 @@
     "typescript": "^5.9.3",
     "unbuild": "^3.6.1"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "simple-git-hooks"
-    ]
-  },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"
   },
