@@ -44,7 +44,7 @@ jobs:
 
       - name: Bump version
         run: |
-          VERSION=$(pnpm version ${{ inputs.release_type }} --no-git-tag-version)
+          VERSION=$(pnpm version ${{ inputs.release_type }} --no-git-tag-version --json | jq -r '.["npm-deprecated-check"]')
           echo "New version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
