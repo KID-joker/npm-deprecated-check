@@ -1113,8 +1113,12 @@ export async function startServer() {
         if (existsSync(pkgPath))
           results.push(dir)
         let files
-        try { files = readdirSync(dir) }
-        catch { return results }
+        try {
+          files = readdirSync(dir)
+        }
+        catch {
+          return results
+        }
         for (const file of files) {
           if (file === 'node_modules')
             continue
@@ -1214,14 +1218,16 @@ And remove the existing `program.parse(process.argv)` at line 102.
 
 Add `"mcp"` and `"mcp-server"` to the keywords array. The keywords should become:
 ```json
-"keywords": [
-  "cli",
-  "cli-tool",
-  "dependencies",
-  "deprecated",
-  "mcp",
-  "mcp-server"
-]
+{
+  "keywords": [
+    "cli",
+    "cli-tool",
+    "dependencies",
+    "deprecated",
+    "mcp",
+    "mcp-server"
+  ]
+}
 ```
 
 - [ ] **Step 5: Run typecheck**
