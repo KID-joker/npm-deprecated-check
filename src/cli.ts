@@ -1,8 +1,9 @@
 import type { Command } from 'commander'
-import type { CommonOption, ConfigOption, CurrentOption, GlobalOption, PackageOption } from './types'
+import type { CommonOption, CompatOption, ConfigOption, CurrentOption, GlobalOption, PackageOption } from './types'
 import process from 'node:process'
 import { Option, program } from 'commander'
 import { version } from '../package.json'
+import checkCompat from './io/compat'
 import checkConfig from './io/config'
 import checkCurrent from './io/current'
 import checkGlobal from './io/global'
@@ -60,6 +61,21 @@ program
       ...option,
     }
     checkPackage(packageOption)
+  })
+
+program
+  .command('compat [packageName]')
+  .description('check Node.js version compatibility for project or package')
+  .addOption(new Option('--node <version>', 'target Node.js version'))
+  .addOption(new Option('--deep', 'deep inspection for monorepo projects'))
+  .addOption(new Option('--ignore <value>', 'ignore specific packages'))
+  .addOption(registryOption)
+  .action((packageName: string | undefined, option: any) => {
+    const compatOption: CompatOption = {
+      ...option,
+      packageName,
+    }
+    checkCompat(compatOption)
   })
 
 program

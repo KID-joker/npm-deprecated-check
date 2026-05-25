@@ -135,11 +135,12 @@ export async function startServer() {
         return errorResult(regResult.message)
 
       try {
-        const { existsSync, readdirSync, readFileSync, statSync } = await import('node:fs')
+        const { existsSync, readFileSync } = await import('node:fs')
         const { join, isAbsolute } = await import('node:path')
         const { isGitPackage, isLocalPackage, isURLPackage } = await import('./filter')
         const { getDependenciesOfLockfile } = await import('./packages/lockfiles')
         const { getDependenciesOfPackageJson } = await import('./packages/package_json')
+        const { findPackageJsonDirs } = await import('./utils/fs')
 
         const currentPath = projectPath || process.cwd()
         if (projectPath && !isAbsolute(projectPath))
@@ -148,33 +149,6 @@ export async function startServer() {
           return errorResult(`Project path does not exist: ${currentPath}`)
         if (!existsSync(join(currentPath, 'package.json')))
           return errorResult(`No package.json found in: ${currentPath}`)
-
-        function findPackageJsonDirs(dir: string, results: Array<string> = [], maxDepth: number = SECURITY.MAX_RECURSION_DEPTH, currentDepth: number = 0) {
-          if (currentDepth >= maxDepth)
-            return results
-          const pkgPath = join(dir, 'package.json')
-          if (existsSync(pkgPath))
-            results.push(dir)
-          let files
-          try {
-            files = readdirSync(dir)
-          }
-          catch {
-            return results
-          }
-          for (const file of files) {
-            if (file === 'node_modules')
-              continue
-            const dirPath = join(dir, file)
-            try {
-              const stat = statSync(dirPath)
-              if (stat.isDirectory())
-                findPackageJsonDirs(dirPath, results, maxDepth, currentDepth + 1)
-            }
-            catch {}
-          }
-          return results
-        }
 
         const pkgPaths = deep ? findPackageJsonDirs(currentPath, [], SECURITY.MAX_RECURSION_DEPTH, 0) : [currentPath]
         const allResults: CheckResult[] = []
@@ -329,6 +303,164 @@ export async function startServer() {
       }
       catch (e) {
         return errorResult(sanitizeError(e))
+      }
+    },
+  )
+
+  server.tool(
+    'check_compat',
+    'Check Node.js version compatibility for a project or package. Reports which dependencies are compatible/incompatible with a target Node version based on engines.node.',
+    {
+      packageName: z.string().optional().describe('npm package name. If not provided, checks the current project.'),
+      nodeVersion: z.string().optional().describe('Target Node.js version (e.g. "18", "20.11.0"). Defaults to current Node version.'),
+      projectPath: z.string().optional().describe('Absolute path to project root (only used when packageName is not provided)'),
+      deep: z.boolean().optional().describe('Deep inspection for monorepo projects'),
+      ignore: z.string().optional().describe('Comma-separated package names to ignore'),
+      registry: z.string().optional().describe('Custom npm registry URL'),
+    },
+    async ({ packageName, nodeVersion, projectPath, deep, ignore, registry }) => {
+      const regResult = validateRegistry(registry || '')
+      if (regResult instanceof Error)
+        return errorResult(regResult.message)
+
+      if (packageName) {
+        const nameResult = validatePackageName(packageName)
+        if (nameResult instanceof Error)
+          return errorResult(nameResult.message)
+
+        try {
+          const targetNodeVersion = nodeVersion || process.version
+          const result = await withTimeout(
+            checkDependencies(
+              { [nameResult]: { range: undefined } },
+              { registry: regResult, failfast: false },
+              { silent: true, targetNodeVersion },
+            ),
+            SECURITY.FETCH_TIMEOUT_MS,
+          )
+
+          const pkg = result.packages[0]
+          if (pkg?.error) {
+            return {
+              content: [{ type: 'text' as const, text: JSON.stringify({ error: sanitizeError(pkg.error) }, null, 2) }],
+            }
+          }
+
+          const compatResult = {
+            targetNodeVersion,
+            packages: result.packages.map(p => ({
+              name: p.name,
+              version: p.version,
+              compatible: !p.requiredNode,
+              nodeRequirement: p.nodeRequirement || null,
+              compatibleVersion: p.compatibleVersion || null,
+            })),
+            summary: {
+              total: result.summary.total,
+              incompatible: result.packages.filter(p => p.requiredNode).length,
+              errors: result.summary.errors,
+            },
+          }
+
+          return {
+            content: [{ type: 'text' as const, text: JSON.stringify(compatResult, null, 2) }],
+          }
+        }
+        catch (e) {
+          return errorResult(sanitizeError(e))
+        }
+      }
+      else {
+        try {
+          const { existsSync } = await import('node:fs')
+          const { join, isAbsolute } = await import('node:path')
+          const { isGitPackage, isLocalPackage, isURLPackage } = await import('./filter')
+          const { getDependenciesOfLockfile } = await import('./packages/lockfiles')
+          const { getDependenciesOfPackageJson } = await import('./packages/package_json')
+          const { findPackageJsonDirs } = await import('./utils/fs')
+
+          const currentPath = projectPath || process.cwd()
+          if (projectPath && !isAbsolute(projectPath))
+            return errorResult('projectPath must be an absolute path')
+          if (!existsSync(currentPath))
+            return errorResult(`Project path does not exist: ${currentPath}`)
+          if (!existsSync(join(currentPath, 'package.json')))
+            return errorResult(`No package.json found in: ${currentPath}`)
+
+          const targetNodeVersion = nodeVersion || process.version
+          const pkgPaths = deep ? findPackageJsonDirs(currentPath, [], SECURITY.MAX_RECURSION_DEPTH, 0) : [currentPath]
+          const allDependencies: Record<string, VersionOrRange> = {}
+          const allDependencyTypes: Record<string, 'production' | 'development'> = {}
+
+          for (const pkgPath of pkgPaths) {
+            const packageJsonPath = join(pkgPath, 'package.json')
+            const dependenciesOfPackageJson = getDependenciesOfPackageJson(packageJsonPath)
+            if (!dependenciesOfPackageJson)
+              continue
+
+            const ignores = ignore?.split(',') || []
+            const npmDependencies: Record<string, VersionOrRange> = {}
+            const dependencyTypes: Record<string, 'production' | 'development'> = {}
+
+            for (const name in dependenciesOfPackageJson.dependencies) {
+              const versionInfo = dependenciesOfPackageJson.dependencies[name]
+              if (!ignores.includes(name) && !isLocalPackage(versionInfo.range as string) && !isURLPackage(versionInfo.range as string) && !isGitPackage(versionInfo.range as string)) {
+                npmDependencies[name] = versionInfo
+                dependencyTypes[name] = 'production'
+              }
+            }
+
+            for (const name in dependenciesOfPackageJson.devDependencies) {
+              const versionInfo = dependenciesOfPackageJson.devDependencies[name]
+              if (!ignores.includes(name) && !isLocalPackage(versionInfo.range as string) && !isURLPackage(versionInfo.range as string) && !isGitPackage(versionInfo.range as string)) {
+                npmDependencies[name] = versionInfo
+                dependencyTypes[name] = 'development'
+              }
+            }
+
+            const dependenciesOfLockfile = await getDependenciesOfLockfile(npmDependencies)
+            Object.assign(allDependencies, npmDependencies, dependenciesOfLockfile)
+            Object.assign(allDependencyTypes, dependencyTypes)
+          }
+
+          const limitResult = withPackageLimit(allDependencies)
+          if (limitResult instanceof Error)
+            return errorResult(limitResult.message)
+
+          const config = { registry: regResult, failfast: false }
+          const result = await withTimeout(
+            checkDependencies(limitResult, config, {
+              dependencyTypes: allDependencyTypes,
+              targetNodeVersion,
+              silent: true,
+            }),
+            SECURITY.FETCH_TIMEOUT_MS,
+          )
+
+          const compatResult = {
+            targetNodeVersion,
+            packages: result.packages.map(p => ({
+              name: p.name,
+              version: p.version,
+              dependencyType: p.dependencyType || null,
+              compatible: !p.requiredNode,
+              nodeRequirement: p.nodeRequirement || null,
+              compatibleVersion: p.compatibleVersion || null,
+            })),
+            summary: {
+              total: result.summary.total,
+              incompatible: result.packages.filter(p => p.requiredNode).length,
+              errors: result.summary.errors,
+            },
+          }
+
+          return {
+            content: [{ type: 'text' as const, text: JSON.stringify(compatResult, null, 2) }],
+          }
+        }
+        catch (e) {
+          return errorResult(sanitizeError(e))
+        }
       }
     },
   )
