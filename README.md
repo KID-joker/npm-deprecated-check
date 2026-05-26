@@ -183,19 +183,34 @@ Options:
 ### Start the MCP Server
 
 ```bash
-npx npm-deprecated-check --mcp
+npx -y npm-deprecated-check --mcp
 ```
 
 ### Client Configuration
 
-**Claude Desktop / OpenCode:**
+**Claude Desktop / OpenCode (recommended: global install):**
+
+```json
+{
+  "mcpServers": {
+    "npm-deprecated-check": {
+      "command": "npm-deprecated-check",
+      "args": ["--mcp"]
+    }
+  }
+}
+```
+
+> Install globally first: `npm install -g npm-deprecated-check`
+
+**Claude Desktop / OpenCode (npx):**
 
 ```json
 {
   "mcpServers": {
     "npm-deprecated-check": {
       "command": "npx",
-      "args": ["npm-deprecated-check", "--mcp"]
+      "args": ["-y", "npm-deprecated-check", "--mcp"]
     }
   }
 }

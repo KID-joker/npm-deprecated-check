@@ -25,7 +25,8 @@
   "main": "dist/cli.mjs",
   "module": "dist/cli.mjs",
   "bin": {
-    "ndc": "bin/ndc.mjs"
+    "ndc": "bin/ndc.mjs",
+    "npm-deprecated-check": "bin/ndc.mjs"
   },
   "files": [
     "dist"
