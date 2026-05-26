@@ -71,7 +71,8 @@ test('current tests', async (t) => {
           fs.writeFileSync(path.join(caseDir, '.yarnrc.yml'), 'nodeLinker: node-modules\n')
         }
 
-        execSync(`${manager} install --quiet`, { cwd: caseDir })
+        const installCmd = manager === 'yarn' ? 'yarn install' : `${manager} install --quiet`
+        execSync(installCmd, { cwd: caseDir })
       }
 
       await check(manager, t)
