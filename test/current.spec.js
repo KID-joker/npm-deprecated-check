@@ -68,7 +68,7 @@ test('current tests', async (t) => {
           const pkgJson = JSON.parse(fs.readFileSync(destFile, 'utf-8'))
           pkgJson.packageManager = 'yarn@4.15.0'
           fs.writeFileSync(destFile, JSON.stringify(pkgJson, null, 2))
-          execSync('corepack enable yarn', { cwd: caseDir })
+          fs.writeFileSync(path.join(caseDir, '.yarnrc.yml'), 'nodeLinker: node-modules\n')
         }
 
         execSync(`${manager} install --quiet`, { cwd: caseDir })

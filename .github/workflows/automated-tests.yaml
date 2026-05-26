@@ -68,7 +68,9 @@ jobs:
           check-latest: true
 
       - name: Enable corepack
-        run: corepack enable
+        run: |
+          corepack enable
+          corepack prepare yarn@4.15.0 --activate
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
