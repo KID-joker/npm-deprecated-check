@@ -67,6 +67,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
           check-latest: true
 
+      - name: Enable corepack
+        run: corepack enable
+
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:

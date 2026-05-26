@@ -63,6 +63,14 @@ test('current tests', async (t) => {
         const srcFile = path.join(__dirname, 'examples', `${caseName}.json`)
         const destFile = path.join(caseDir, 'package.json')
         fs.copyFileSync(srcFile, destFile)
+
+        if (manager === 'yarn') {
+          const pkgJson = JSON.parse(fs.readFileSync(destFile, 'utf-8'))
+          pkgJson.packageManager = 'yarn@4.15.0'
+          fs.writeFileSync(destFile, JSON.stringify(pkgJson, null, 2))
+          execSync('corepack enable yarn', { cwd: caseDir })
+        }
+
         execSync(`${manager} install --quiet`, { cwd: caseDir })
       }
 
