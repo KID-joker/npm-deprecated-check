@@ -66,13 +66,12 @@ test('current tests', async (t) => {
 
         if (manager === 'yarn') {
           const pkgJson = JSON.parse(fs.readFileSync(destFile, 'utf-8'))
-          pkgJson.packageManager = 'yarn@4.15.0'
+          pkgJson.packageManager = 'yarn@1.22.22'
           fs.writeFileSync(destFile, JSON.stringify(pkgJson, null, 2))
           fs.writeFileSync(path.join(caseDir, '.yarnrc.yml'), 'nodeLinker: node-modules\n')
         }
 
-        const installCmd = manager === 'yarn' ? 'yarn install' : `${manager} install --quiet`
-        execSync(installCmd, { cwd: caseDir })
+        execSync(`${manager} install --quiet`, { env: { ...process.env }, cwd: caseDir })
       }
 
       await check(manager, t)
