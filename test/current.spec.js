@@ -71,7 +71,7 @@ test('current tests', { concurrency: false }, async (t) => {
           fs.writeFileSync(path.join(caseDir, '.yarnrc.yml'), 'nodeLinker: node-modules\n')
         }
 
-        execSync(`${manager} install --quiet --no-cache`, { cwd: caseDir, stdio: 'inherit', env: { ...process.env, YARN_CACHE_FOLDER: path.join(caseDir, '.yarn-cache') } })
+        execSync(`${manager} install --quiet --network-concurrency 1 --mutex file`, { cwd: caseDir, stdio: 'inherit', env: { ...process.env, YARN_CACHE_FOLDER: path.join(caseDir, '.yarn-cache') } })
       }
 
       await check(manager, t)
