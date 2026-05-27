@@ -52,7 +52,7 @@ async function check(manager, t) {
   })
 }
 
-test('current tests', async (t) => {
+test('current tests', { concurrency: false }, async (t) => {
   try {
     for (const manager of managers) {
       // Setup test directories
@@ -71,7 +71,7 @@ test('current tests', async (t) => {
           fs.writeFileSync(path.join(caseDir, '.yarnrc.yml'), 'nodeLinker: node-modules\n')
         }
 
-        execSync(`${manager} install --quiet`, { env: { ...process.env }, cwd: caseDir })
+        execSync(`${manager} install --quiet --no-cache`, { cwd: caseDir, stdio: 'inherit', env: { ...process.env, YARN_CACHE_FOLDER: path.join(caseDir, '.yarn-cache') } })
       }
 
       await check(manager, t)
