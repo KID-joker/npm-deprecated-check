@@ -35,8 +35,13 @@ export function getDependenciesOfLockfile(packages: { [k: string]: VersionOrRang
       const content = fs.readFileSync(this.path, 'utf-8')
       const json = parseSyml(content)
       const result: Record<string, VersionOrRange> = {}
-      for (const packageName in packages)
-        json[`${packageName}@${packages[packageName].range}`] && (result[packageName] = { version: json[`${packageName}@${packages[packageName].range}`].version })
+      for (const packageName in packages) {
+        const classicKey = `${packageName}@${packages[packageName].range}`
+        const berryKey = `${packageName}@npm:${packages[packageName].range}`
+        const entry = json[classicKey] || json[berryKey]
+        if (entry)
+          result[packageName] = { version: entry.version }
+      }
 
       return result
     },

@@ -7,6 +7,7 @@ export default defineBuildConfig({
     inlineDependencies: true,
     esbuild: {
       minify: true,
+      target: 'es2022',
     },
   },
   clean: true,

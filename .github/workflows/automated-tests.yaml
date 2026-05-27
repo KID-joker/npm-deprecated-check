@@ -67,6 +67,11 @@ jobs:
           node-version: ${{ matrix.node-version }}
           check-latest: true
 
+      - name: Enable corepack
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -86,4 +91,4 @@ jobs:
         run: pnpm install --prod
 
       - name: Run tests
-        run: node --run test
+        run: node --run test --test-concurrency=1

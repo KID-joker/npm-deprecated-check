@@ -52,7 +52,7 @@ async function check(manager, t) {
   })
 }
 
-test('compat tests', async (t) => {
+test('compat tests', { concurrency: false }, async (t) => {
   try {
     for (const manager of managers) {
       for (const caseName of cases) {
@@ -62,7 +62,15 @@ test('compat tests', async (t) => {
         const srcFile = path.join(__dirname, 'examples', `${caseName}.json`)
         const destFile = path.join(caseDir, 'package.json')
         fs.copyFileSync(srcFile, destFile)
-        execSync(`${manager} install --quiet`, { cwd: caseDir })
+
+        if (manager === 'yarn') {
+          const pkgJson = JSON.parse(fs.readFileSync(destFile, 'utf-8'))
+          pkgJson.packageManager = 'yarn@1.22.22'
+          fs.writeFileSync(destFile, JSON.stringify(pkgJson, null, 2))
+          fs.writeFileSync(path.join(caseDir, '.yarnrc.yml'), 'nodeLinker: node-modules\n')
+        }
+
+        execSync(manager === 'yarn' ? `${manager} install --ignore-scripts --quiet --mutex file --network-concurrency 1` : `${manager} install --quiet`, { cwd: caseDir, stdio: 'inherit', env: { ...process.env, YARN_CACHE_FOLDER: path.join(caseDir, '.yarn-cache') } })
       }
 
       await check(manager, t)
